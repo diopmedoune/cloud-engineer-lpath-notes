@@ -1,0 +1,53 @@
+== Introduction to the Associate Cloud Enginer role ==
+
+Job of a cloud engineer  : 
+    An Associate Cloud Engineer deploys and secures applications and infrastructure, monitors 
+    operations of multiple projects and maintains enterprise solutions to ensure that they meet 
+    target performance metrics.
+
+Why become : 
+    - Migrating application to Google Cloud
+
+Cetication benefits :
+    Gain industry recognition 
+    Validate technical expertise 
+    Take career to the next level 
+
+Deference between Associate and Professional Certifcation : 
+    Associate : 
+        Technical requirements : build, deploy, manage + Customer implementation
+        Business requirements : Design, Plan, Ensure feasibility, Optimize + Technical requirements 
+            + Customer Implementation 
+
+
+-- Certification Process : 
+    Courses and skill badges in the learniing path 
+        . Google Cloud Fundamental Core infra.    (1 day)
+        . Arichitecting with Google Compute Engine (3 days)
+            Essential Google Cloud Infra. : Foundation 
+            Essential Google Cloud Infra. : Services 
+            Elastic Google Cloud Infra. : Scaling and Automation 
+        . Logging Monitoring and Observability in Gogle Cloud (2 days)
+            Logging and Monitoring in Google Cloud 
+            Observability in Google Cloud 
+        . Getting Started with Terrafrom for Google Cloud (1 day)
+    
+It's recommended to pay attention to the details before answering questions 
+
+
+-- Creating a study plan : 
+    Here they porpose a 72 pages document as a guide 
+
+-- Setting up Cymbal Superstore's cloud environement : 
+    Role as a cloud engineer in this project : 
+        . Setting up cloud projects and accounts 
+        . Managing billing configuration 
+
+
+After seing the first quiz, i conclude that this course is not the one which i have to start with 
+because some quesitons require understanding some gcloud services implementation. 
+
+
+
+
+        

@@ -1,0 +1,364 @@
+-----------------------------------
+routing, switching, subnetting, vpn creation 
+-----------------------------------
+
+
+
+
+Gcloud Service categories : 
+    - Compute 
+    - Storage 
+    - Big Data 
+    - Machine Learning 
+    - Application Services 
+
+
+- IaaS (Infrastructure as a Serivice)  and PaaSs (Platform as a Service) 
+    Iaas offerings provide : 
+        . Row compute 
+        . Storage 
+        . Network capabilities 
+        
+        ex: Compute Engine (IaaS serivce)
+
+        . Here customers pay for what they allocate
+
+    PaaS : 
+        It bind code to libraries that proviide access to the infrasture application needs.
+        
+        Ex : App Engine (PaaS service)
+
+        . Here they pay for what they use 
+
+
+Cloud Run -> deploy containerized microservices based applciation in a fully-managed environment 
+Cloud Run functions -> Manages event-driven code as a pay-as-you-go service 
+
+
+- SaaS (Software as a Service) : 
+    They don't run on a computer but run on the cloud 
+    Ex : google drive is a SaaS 
+
+- Google Cloud Network : 
+    . Google cloud network is designed to give customers the highest possible throughput and lowest possible 
+    latencies for their applications by leveraging more than 100 content caching nodes worldwide.
+    . Seven major geographical location "dont" Africa
+    . This locations are divided in regions which are divided in zones 
+    . A zone is an area where Google Cloud resources are deployed.
+    . Spanner multi-region configurations allow  to replicate the database's data not just in multiple 
+    zones, but in multiple zones across multiple regions, as defined by the instance configuration.
+
+- Envrionmental Impact 
+    * will get back on this after 
+
+- Securitiy 
+    Google Infrastrusture Security : 
+        . Hardware design 
+        . Secure boot stack 
+        . Permies security
+
+        Google desingn and build itself its datacenters what provide it a high level of security 
+
+
+    Service deployement layer : 
+        . Encryption of inter-service communication
+
+
+    User identity layer :
+        . User identity -> withe some challenges like checking if he had loged in for the same location or device in the past, ect.
+
+
+    Storage serivices layer : 
+        . Encryption at rest 
+
+    Internet communication layer :
+        . Google Front End ("GFE") -> protect also DoS attacks 
+        . Denial of Service ("Dos) protection
+
+    Operational security layer :
+        . Intrusion detection 
+        . Reducing insider risk 
+        . Employee Universal Second Factor (U2F) use 
+        . Software development practices
+
+
+    Open source ecosystems : 
+        If an organisation find that google is no longer the best provider for their needs, google provide them the ability to 
+        run their applications elsewhere 
+
+        Ex : 
+            Kubernetes and Google Kubernetes Engine give the ability to mix and match microservices running across different clouds 
+            Google Cloud Observability lets customer monitor workloads across multiple cloud providers 
+
+    Pricing and biling : 
+        . Budgets : It can be a fixed limit or tied to another metric; for example, a percentage of the previous month’s spend.
+        . Alert : to be notified when costs approach our budget limit, we can create an alert; for example we can set an alert of 90% of our budget limit. 
+        . Reports : a visual tool in the Google Cloud Console that allows to monitor expenditure on a project or services
+        . Quotas -> two types : 
+            - Rate quota 
+                It reset after a specific time. For example, by default, the GKE service implements a quota of 3,000 calls to its
+                API from each Google Cloud project every 100 seconds.
+
+            - Allocation quota 
+                It govern the number of resources we can have in our projects.
+                For example, by default, each Google Cloud project has a quota allowing it no more than 15 Virtual Private Cloud networks.
+
+
+- Fault tolerance : 
+    It's a system's ability to continue operating without interruption despite the failure of one or more of its components
+
+
+- Ressources and Accses in the Cloud : 
+    . Project -> it is difined by a : 
+        - Project ID -> Globally unique, assigned by GC and mutable during creation and not after
+        - Project name -> Mutable 
+        - Project number -> Globally unique, assigned by GC, immutable 
+
+
+- IAM (Identity and Access Management) : 
+    . With IAM admins can apply polices that difine who can do what on which resources 
+    . An IAM role is a collection of permissions. We can define deny rules that prevent certain principals from using certain permissions, 
+      regardless of the roles they're granted. This is because IAM always checks relevant deny policies before checking relevant allow policies. 
+
+    - Basic IAM role : 
+        . Owner -> access, change resources, manage role and permissions, set up billing
+        . Editor -> access, change resource
+        . Viewer -> access
+        . Billing Admin -> access, controle the billing 
+
+    - Predifined Role : 
+        For example with compute Engine we have 
+            . Instance Admin Role with this pridifined role : 
+                - compute.instances.delete 
+                - compute.instances.get 
+                - compute.instances.list 
+                - compute.instances.setMachineType 
+                - compute.instances.start 
+                - compute.instances.stop 
+
+    - Custom role : 
+        Companies use a “least-privilege” model in which each person in your organization is given the minimal amount of privilege needed to do their job.
+        For example, we can define an “instanceOperator” role to allow some users to stop and start Compute Engine virtual machines, but not reconfigure them.
+        Custom roles can only be applied to either the project level or organization level; they can’t be applied to the folder level.
+
+
+- Service accounts : 
+    It allow to give necessary permissions to a vm so it can interact wiht other cloud services wihtout humain intervention 
+    They are named by email address and use crytographic keys for authentication (not password)
+    In addition to being an identity, a service account is also a resource, so it can have IAM policies of its own attached to it.
+
+
+- Cloud Identity : 
+   With it, organizations can define policies and manage their users and groups using the Google Admin Console.
+
+
+- Interacting with Gcloud -> for ways : 
+    . Google Cloud console 
+    . Google Cloud SDK and Cloud Shell (Google Cloud CLI, bq -A)
+    . APIs ordinary compute engine on gcp
+    . Google Cloud app 
+        It's used to start, stop, and use SSH to connect to Compute Engine instances and see logs from each instance,
+        administer applications deployed on App Engine by viewing errors, rolling back deployments, and changing traffic splitting.
+        We can set up customizable graphs showing key metrics such as CPU usage, network usage, requests per second, and server errors.
+
+ 
+
+-- LAB : Use Google Cloud Marketplace to quickly and easily deploy a LAMP stack on a Compute Engine instance.
+    Bitnami LAMP stacks are used to quickly set up a development and production environment for building websites and web apps using the LAMP technology stack
+
+    We successfuly deployed the LAMP stack and verify it by checking the default web page 
+
+
+= Virtual Machines and Networks in the Cloud 
+
+    - Virtual Private Cloud (VPC) networking : 
+        VPC is a secure, individual, private cloud-computing model hosted within a public cloud like Google Cloud !
+        VPC networks connect google cloud ressources to each other and to the internet 
+
+
+    - Compute Engine : 
+        It allow users to create vm on google cloud infrasture 
+
+        There are to type of vms : 
+            . Preemptible/Spot VM 
+            . Compute Engine vm 
+
+            Preemptible VMs on gCE offer a significant cost reduction (->57%) compared to standard Compute Engine instances
+
+            A Preemptible or Spot VM is different from an ordinary Compute Engine VM in only one respect: Compute Engine has permission to terminate a job if 
+            its resources are needed elsewhere. 
+
+            Spot VMs differ from Preemptible VMs by offering more features. For example, preemptible VMs can only run for up to 24 hours at a time,
+            but Spot VMs do not have a maximum runtime. We have also deeper discount with preemptible VMs. 
+
+            Spot VMs are the recommended and latest version of preemptible VMs.
+
+
+    - Scaling virtual machines : 
+        Compute engine have a feature called Autoscaling, where VMs can be added to or subtracted from an application based on load metrics.
+
+
+    - Important VPC compatibilities : 
+        Much like physical networks, VPCs have routing tables which are built-in. They’re used to forward traffic from one instance to another 
+        within the same network, across subnetworks, or even between Google Cloud zones, without requiring an external IP address. 
+
+
+    - Cloud Load Balancing : 
+        Its job is to distribute user traffic across multiple instances of an application.
+        By spreading the load, load balancing reduces the risk that applications experience performance issues. 
+
+        . Application Load Balancer : 
+        . Network Load Balancers - Layer 4 (Transport) :
+            They efficiently handle TCP, UDP, and other IP protocols.
+            - Proxy Network Load Balancers also function as reverse proxies: 
+                terminate client connections and establish new ones to backend services.
+            - Passthrough Network Load Balencers : 
+                They do not modify or terminate connections. Instead, they directly forward traffic to the backend while preserving the original source IP address. 
+    
+    - Cloud DNS and CLoud CDN : 
+        Google Cloud offers Cloud DNS to help the world find them.
+        It’s a managed DNS service that runs on the same infrastructure as Google.
+
+        Google also has a global system of edge caches which refers to the use of caching servers to store content closer to end users. 
+        We can use this system to accelerate content delivery in applications by using Cloud CDN (Content Delivery Network).
+
+    - Connecting Network to google cloud VPC : 
+        As a customer, we may need to connect network in our system or network in other clouds to Google VPC networks. And there are 
+        serveral effective ways to accomplish this of which : 
+            - Start a VPN (Virtual Private Network) over the internet and use Cloud VPN to create a "tunnel" connection 
+                To make the connection dynamic, a Google Cloud feature called Cloud Router can be used; it lets other networks and 
+                Google VPC, exchange route information over the VPN using the Border Gateway Protocol. 
+
+            - “peering” with Google using Direct Peering : 
+                It mean putting a router in the same public datacenter as a Google point of presence and using it ot exchange 
+                traffic between networks.
+            ...
+
+    -- LAB : Getting Started with VPC Networking and Google Compute Engine
+        Overview : 
+            Google Cloud Virtual Private Cloud (VPC) provides networking functionality to Compute Engine virtual machine (VM) instances, Kubernetes Engine containers,
+            and App Engine flexible environment.
+            A VPC network is a global resource that consists of a list of regional virtual subnetworks (subnets) in data centers, all connected by a global wide area 
+            network (WAN). VPC networks are logically isolated from each other in Google Cloud.
+        
+
+        . Firewall rules allow you to control which packets are allowed to travel to which destinations. 
+
+
+        back on this later (firewall):
+            port 3389 
+            port 22 
+
+
+        Note: Without a VPC network, there are no routes and no firewall rules! 
+        Note: As expected, you cannot create a VM instance without a VPC network! 
+
+
+        """ Will back on this lab toomorow" 
+
+
+
+==> Google cloud Storage : 
+    Storage options : 
+        . Structured data 
+        . Unstructured data 
+        . Transactional data 
+        . Relational data 
+
+    
+    -- Cloud storage : 
+        . It is a service that offers developers and IT organizations durable and highly available object storage
+        . Object storage is a computer data storage architecture that manages data as “objects” and not
+          as a file and folder hierarchy (file storage), or as chunks of a disk (block storage). 
+        
+        Object packed format contains : 
+            . Binary form of the actual data itself 
+            . Relevant associated meta-data
+            . Globally unique identifier 
+
+        Cloud Storage’s primary use is whenever binary large-object storage (also known as a “BLOB”) is needed for online content
+        such as videos and photos, for backup and archived data and for storage of intermediate results in processing workflows.
+
+        
+        Cloud Storage files are organized into buckets. A bucket needs a globally unique name and a specific geographic location 
+        for where it should be stored, and an ideal location for a bucket is where latency is minimized.  
+
+        Google Cloud Storage Objects are immutable which mean that they are not edited but A new version is created with every change made.
+
+        With object versioning enabled, we can list the archived versions of an object, restore or permanently delete a version of an object.
+
+        - Fine control of objects access : 
+            Each access control list consists of two pieces of information :
+                . The first is a scope, which defines who can access and perform an action (This can be a specific user or group of users.).
+                . The second is a permission, which defines what actions can be performed, like read or write
+
+
+        - Storage classes and data transfer: 
+            . Strandard Storage:
+                best for frequently accessed or "hot" data 
+            . Nearline Storage:
+                for infrequently accessed data (like Once per month)
+            . Coldlne Storage: 
+                for also infrequently accessed data by here but for like once every 90 days. It's a low-cost option.
+            . Archive Storage : 
+                Once a year 
+
+            - Autoclass : 
+                Cloud Storage also provides a feature called Autoclass, which automatically transitions objects to 
+                appropriate storage classes based on each object's access pattern.
+
+    
+    -- Cloud SQL : 
+        It offers fully managed relational databases, including MySQL, PostgreSQL, and SQL Server as a service.
+
+        . It's designed to hand off mundane, but necessary and offend time-consuming, task to Google like : 
+            - Appliying patches/updates
+            - Managing backups 
+            - Configuring replications 
+
+        It supports automatic replication scenarios, such as from a Cloud SQL primary instance, an external 
+        primary instance, and external MySQL instances
+
+        * The cost of an instance covers seven backups.
+
+        A benefit of Cloud SQL instances is that they are accessible by other Google Cloud services, and even external services.
+
+
+    -- Spanner : 
+            Is a fully managed relational database service that scales horizontally, is strongly consistent, and speaks SQL.
+
+            Spanner is especially suited for applications that require a SQL relational database management system with joins and
+            secondary indexes, built-in high availability, strong global consistency, and high numbers of input and output operations per second.   
+            We’re talking tens of thousands of reads and writes per second or more
+
+    
+    -- Firestore:
+        
+        Firestore is a flexible, horizontally scalable, NoSQL cloud database for mobile, web, and server development (data is stored in documents and 
+        then organized into collections.)
+
+        We have indexation by default, so query performance is proportional to the size of the result set, not the dataset
+
+        Firestore uses data synchronization to update data on any connected device
+
+        It caches data that an app is actively using, so the app can write, read, listen to, and query data even if the device is offline.
+
+        When the device comes back online, Firestore synchronizes any local changes back to Firestore.
+
+        It support also Real transaction, automatic multi-region data replication, aomic batch operations 
+
+    
+    -- Bigtable:
+        . It's Google's NoSQL big data database service
+        . It is designed to handle massive workloads at consistent low latency and high throughput, so it's a  choice for both operational 
+            and analytical applications, including Internet of Things, user analytics, and financial data analysis. 
+        . They can run machine learning algorithms on the data.
+
+
+    ** BigQuery -> not mentioned on this coursebecausei it's on the edge between data storage and data processing
+        The usual reason to store data in BigQuery is the use of its big data analysis and interactive querying capabilities
+
+
+
+
+
