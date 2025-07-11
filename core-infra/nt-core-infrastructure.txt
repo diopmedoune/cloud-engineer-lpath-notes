@@ -1,9 +1,42 @@
------------------------------------
-routing, switching, subnetting, vpn creation 
------------------------------------
+----------------------------------------------------------------------------------------------------------------------
+
+                                    === Module Core Infrastructure ====
+
+Dans ce module j’ai appris les bases des infrastructures dans le cloud avec GCP.
+
+GCP propose plusieurs services : Compute, Storage, Big Data, Machine Learning, App Services.
+    . IaaS (ex: Compute Engine) permet d’utiliser des VM qu’on paie selon les ressources qu’on alloue.
+    . PaaS (ex: App Engine) laisse juste déployer du code, GCP gère le reste.
+    . SaaS (ex: Google Drive) c’est des apps directement utilisables en ligne.
+
+GCP est structuré par zones et régions. Les VPC servent à connecter les ressources entre elles,
+avec routes, firewalls, subnets.
+
+Pour gérer les droits on parle IAM en configurant des rôles, "policies", "deny rules", etc. On peut aussi
+créer des Service Accounts pour autoriser des VMs à accéder à d'autres services.
+
+Il existe plusieurs types de stockage :
+    . Cloud Storage pour des objets (ex: images, vidéos)
+    . Cloud SQL pour des bases relationnelles (ex: MySQL)
+    . Firestore pour NoSQL en temps réel
+    . Spanner pour du SQL distribué 
+    . Bigtable pour gros volumes à haute vitesse
 
 
+Avec les LABs :
+    - J’ai déployé une stack LAMP via le Marketplace, reliée à Cloud SQL et Cloud Storage.
 
+    - J’ai travaillé sur les VM Compute Engine, avec autoscaling, modification des paramétres de pare-feux, ...
+    
+    - Ensuite j'ai  créé un site (page) web simple en PHP, connecté.e à notre instance MySQLDB créée avec CloudSQL. 
+      La page web affiche également une image créée dans notre propre bucket. Ce qui démontre la compatibilité 
+      entre les services Google Cloud.
+    
+    - Enfin, j’ai utilisé Cloud Run pour déployer une app nodeJS simple conteneurisée (sans gérer l’infra).
+
+----------------------------------------------------------------------------------------------------------------------
+
+                                                    === Notes ===
 
 Gcloud Service categories : 
     - Compute 
@@ -254,7 +287,20 @@ Cloud Run functions -> Manages event-driven code as a pay-as-you-go service
         Note: As expected, you cannot create a VM instance without a VPC network! 
 
 
-        """ Will back on this lab toomorow" 
+        - Resume : 
+            We learned that after deleteting the default network we cannot create any VM instances without a VPC network.
+            We created a new auto mode VPC network with subnets, routes, firewall rules, and two VM instances. Then we tested the connectivity for the VM instances 
+            and explored the effects of the firewall rules on connectivity.
+
+    --- Quiz (just interesing questions):
+        For which of these interconnect options is a Service Level Agreement available?
+            answer -> Dedicated Interconnect
+        
+        In Google Cloud VPCs, what scope do subnets have?
+            answer -> Regional
+        
+
+            
 
 
 
@@ -359,6 +405,104 @@ Cloud Run functions -> Manages event-driven code as a pay-as-you-go service
         The usual reason to store data in BigQuery is the use of its big data analysis and interactive querying capabilities
 
 
+    --- LAB : Getting Started with Cloud Storage and Cloud SQL 
+        Objectives:
+            Create a Cloud Storage bucket and place an image into it.
+            Create a Cloud SQL instance and configure it.
+            Connect to the Cloud SQL instance from a web server.
+            Use the image in the Cloud Storage bucket on a web page.
+
+
+        * We successfuly create a simple web page with php, which connect to our mysqldb instance created withe cloudSQL and the webpage 
+          show also an image that we created in our own bucket. This demonstrate compatibility between google cloud services.
+
+        -------------------------
+        we'll back on this to complete notes (have to note commands)
+        -------------------------
+
+
+==> Containers in the  Cloud:
+    . The idea of a container is to give the independent scalability of workloads in PaaS and an abstraction layer of the OS and hardware in IaaS.
+    . With them, scaling is more easy ù
+
+    --- Kubernetes:
+        It is s an open-source platform for managing containerized workloads and services.They can  be bootstrapped using Google Kubernetes Engine (GKE).
+        K8s make easy to orchestrate many containers on many hosts, scale them as microservices, and easily deploy rollouts and rollbacks.  
+
+        In Kubernetes, a node represents a computing instance, like a machine.
+
+        Deploying containers on nodes by using a wrapper around one or more containers is what defines a Pod (smallest deployable unit in Kubernetes).
+    
+        The Pod provides a unique network IP and set of ports for containers and configurable options that govern how containers should run.
+
+        A Deployment represents a group of replicas of the same Pod and keeps  Pods running even when the nodes they run on fail.
+
+    --- Google Kubernetes Engine 
+        - Role:
+            GKE takes responsibility for provisioning and managing all the control plane infrastructure behind it.
+            It also eliminates the need of a separate control plane. 
+
+
+        . With the Autopilot mode, which is recommended, GKE manages the underlying infrastructure such as node configuration,
+          autoscaling, auto-upgrades, baseline security configurations, and baseline networking configuration.
+
+        . With the Standard mode, we manage the underlying infrastructure, including configuring the individual nodes.
+
+
+        - Autopilot: 
+            Cluster management mode that simplifies operations by automating node management, scaling, and security configurations
+
+
+        -- LAB: Hello Cloud Run 
+            Objectives
+                Enable the Cloud Run API.
+                Create a simple Node.js application that can be deployed as a serverless, stateless container.
+                Containerize your application and upload to Artifact Registry.
+                Deploy a containerized application on Cloud Run.
+                Delete unneeded images to avoid incurring extra storage charges.
+
+
+            . Cloud Build is a service that executes builds on Google Cloud. It executes a series of build steps,
+                where each build step is run in a Docker container to produce your application container (or other 
+                artifacts) and push it to Artifact Registry, all in one command.
+            
+            . While Cloud Run does not charge when the service is not in use, we might still be charged for storing the built container image.
+
+            - Commands:
+                . gcloud services enable run.googleapis.com -> enable cloud RUN API 
+                . gcloud config set compute/region "REGION" -> set compute region 
+                . LOCATION="Region" -> create location env. variable 
+                . mkdir helloworld && cd helloworld -> project folder 
+                . nano package.json -> create and fill(after) file that will content configuration and dependencies of the web-app 
+                . nano index.js -> create and fill (just after) our simple web app content 
+                . nano Dockerfile -> create the docker file that we will use to build our container image 
+                . gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld -> build the container image using cloud build 
+                    gcr mean google cloud registery 
+                . gcloud auth configure-docker -> Configures Dcoker to access GCR and Artifact Registry with Google Cloud credentials
+
+                
+==> Applications in the Cloud:
+    --- Cloud Run:
+        . A managed compute platform that can run stateless containers
+        . Serverless, removing the need for infra. management 
+        . Build 
+        . Build on Knative, an open API and runtime env. built on k8s.
+        . Can automatically scale up and down from zero almost intantaneously, charging only for the resources used 
+        . We can use it to run web applications written using popular languages, such as: Java, Python, Node.js, ...
+
+
+
+    --- Cloud Run functions: 
+        It is a lightweight, event-based, asynchronous compute solution that allows to create small, single-purpose
+        functions that respond to cloud events, without the need to manage a server or a runtime environment.
+        * For example converting uploaded image to appropriate format.
+        It supports writing source code in a number of programming languages: Node.js, Python, Go, Java, Net Core, Ruby, and PHP. 
+        
+        Cloud Run functions is integrated with Google Cloud Observability logging and monitoring services to make it fully observable.
+
+    --- Prompt Enginnering:
+        Is this section, notions of generative IA, prompt engineering, large language model,
+        prompt engineering best practices are explained.
 
 
 
