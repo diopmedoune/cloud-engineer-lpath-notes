@@ -1,6 +1,6 @@
-----------------------------------------------------------------------------------------------------------------------
+=== Module 3: Google Cloud Fundamentals Core Infrastructure ====
 
-                                    === Module Core Infrastructure ====
+----------------------------------------------------------------------------------------------------------------------
 
 Dans ce module j’ai appris les bases des infrastructures dans le cloud avec GCP.
 
@@ -34,7 +34,7 @@ Avec les LABs :
     
     - Enfin, j’ai utilisé Cloud Run pour déployer une app nodeJS simple conteneurisée (sans gérer l’infra).
 
-----------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------- --------------------------------------------------------------
 
                                                     === Notes ===
 
@@ -503,6 +503,4 @@ Cloud Run functions -> Manages event-driven code as a pay-as-you-go service
     --- Prompt Enginnering:
         Is this section, notions of generative IA, prompt engineering, large language model,
         prompt engineering best practices are explained.
-
-
 

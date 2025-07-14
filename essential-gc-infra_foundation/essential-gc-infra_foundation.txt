@@ -1,0 +1,337 @@
+=== Module 4 -> Essential Google Cloud Infrastructure: Foundation ===
+
+--- Extra notes:
+    By default, Compute Engine adds the generated key to project or instance metadata.
+    If your account is configured to use OS Login, Compute Engine stores the generated key with your user account
+    It's recommanded to use curstom mode network in production 
+
+        -> Search 
+    -----------------------------------------------------
+    Note that the IP CIDR ranges of these networks do not overlap. This allows you to set up mechanisms such as 
+    VPC peering between the networks. If you specify IP CIDR ranges that are different from your on-premises network, 
+    you could even configure hybrid connectivity using VPN or Cloud Interconnect.
+
+    * Therefore, no internal IP address communication is allowed between networks, unless you set up mechanisms such as VPC peering or VPN.
+
+    TPUs are Google’s custom-developed application-specific integrated circuits used to accelerate machine learning workloads.
+    TPUs act as domain-specific hardware, as opposed to general-purpose hardware with CPUs and GPUs.
+    This allows for higher efficiency by tailoring architecture to meet the computation needs in a domain, such as the matrix multiplication in machine learning.
+
+    Cloud TPUs have been integrated across Google products, making this state-of-the-art hardware and supercomputing technology available to Google Cloud customers. 
+    -----------------------------------------------------
+
+
+=== Course Introduction ===
+
+    - Google Cloud Products and Services 
+        IaaS : CPUs, Memory, Disks, Interfaces 
+        PaaS : Servers,VM Intances ; Clusters, Cluster Manangement 
+        SaaS : Serverless, Autoscaling 
+
+
+    - Compute Engine: to run vm on demand in the cloud (IaaS solution)
+
+    - GKE: It let run containerized applications on a cloud env. that google manage for us under our 
+           administrative control 
+    - App Engine: GCP fully managed platform as a service framework, it's a way to run code in the cloud 
+                  without having to worry about infrastructure
+    - Cloud Functions: It's a completely serverless env. or function as a service 
+    - Cloud Run: A managed compute platform that lets run stateless containers via web requests or Pub/Sub events
+                 It is fast. It can automatically scale up and down from zero almost intantaneously and charges only 
+                 the ressources used.
+
+
+    -- Cloud Infrastructure: Foundation 
+        . Intro to google Cloud 
+        . Virtual Networks 
+        . Virtual machines 
+
+    -- Cloud Infrastructure: Core Services 
+        . IAM 
+        . Data Storage Services 
+        . Resource Management 
+        . Resoure Monitoring 
+
+    -- Cloud Infrastructure: Scaling and Automaiton 
+        . Interconnecting Networks 
+        . Load Balancing and Autoscaling 
+        . Infrastructure Automation 
+        . Managed Serivices 
+
+
+=== Interaction with Google Cloud ===
+    
+    - Using Google Cloud: 
+        There are four ways to interact with gc:
+            . Google Cloud Console 
+            . Cloud Shell and Google Cloud CLi 
+            . REST-based API 
+            . Cloud Mobile APP 
+
+        
+    -- Lab: Working with the Google Cloud Console and Shell 
+        Lab Objectives:
+            . Get access to Google Cloud 
+            . Create a Cloud Storage bucket using the Google Cloud console 
+            . Create a Cloud Storage bucker using Cloud Shell 
+            . Become familiar with Cloud Shell 
+
+        
+        . Quiz anwswers: 
+            Cloud Shelle provides: 
+                Built-in authorization for access to ressources 
+                5GB of persistent storage (/home)
+                Command-line access to a free temporary Compute Engine VM 
+
+        . Command to create a bucket on the CLI:
+            gcloud storage buckets create gs://[BUCKET_NAME]
+        
+        * In the cloud shell, we can upload a file by clicking the More button (trois points) and then copy it to a 
+          bucket with this command : gcloud storage cp [MY_FILE] gs://[BUCKET_NAME]
+
+        - Create a persistent state in Cloud Shell:
+            - Indentify available regions:
+                . gcloud compute regions list 
+            - Create and verify and env. variable:
+                . INFRACLASS_REGION=[YOUR_REGION]
+                . echo $INFRACLASS_REGION
+            - Create a subdirectory for materials used in this lab:
+                . mkdir infraclass 
+                . touch infraclass/config
+            - Append the value of the Region environment variable to the config file:
+                . echo INFRACLASS_REGION=$INFRACLASS_REGION >> ~/infraclass/config
+            - Create a second environment variable for your Project ID:
+                . INFRACLASS_PROJECT_ID=[YOUR_PROJECT_ID]
+            - Append the value of the Project ID environment variable to the config file
+                . echo INFRACLASS_PROJECT_ID=$INFRACLASS_PROJECT_ID >> ~/infraclass/config
+            - We use source to set env. variables and echo to verify 
+                . source infraclass/config
+                . echo $INFRACLASS_PROJECT_ID
+
+            With this config., when we close the shell, we lose variables. To avoid this, we gonna modify the bash profile 
+            and create persistence. 
+                . nano .profile ->/ and add the following line to tend of the file 
+                . source infraclass/config 
+            And the world is happy !!!
+
+
+        * GC SDK (Software Development Kit): a set of command-line tools and libraries that enable users to manage and interact with GCP.
+
+    -- LAB: Infrastructure Preview: 
+        . Jenkins: open-source automation  server primarely used for CI/CD.  Jenkins helps to avoid breaking changes so that you can save 
+          time and ensure the delivery of high-quality software. Its web interface provides an easy way to manage and test your applications
+          before taking them to production
+
+        * Google Cloud Marketplace let quickly deploy functional software pakcages by providing pre-defined templates with which Deployment 
+          Manager service.
+
+        * Deployment Manager is a Google Cloud service that uses templates written in a combination of YAML, python, and Jinja2 to automate 
+          the allocation of Google Cloud resources and perform setup tasks
+
+        Here we created a deployemnt by using "Bitinami pakcage for Jenkins". After we lauched Jenkins and examinated the deployment by clicking 
+        to site url. We also have done some admin tasks by viewing the deployment in vm instances SSH to it for shutting down and restart the 
+        serviices with this commands:
+            . sudo /opt/bitnami/ctlscript.sh stop 
+            . sudo /opt/bitnami/ctlscript.sh restart 
+
+    - Project Demo:
+        Some useful commands:
+            . gcloud config list | grep project -> search for a specific project
+            . export PROJECT_1_ID=my-seoncond-project-249620 
+            . gcloud config set project $PROJECT_1_ID
+            . gcloud config list | grep project -> and we'll se another project 
+
+
+=== Virtual Networks ===
+
+    -- Module Overview :
+        PoPs are where Google's network is connected to the rest of internet 
+
+        - VPC objects:
+            . Projects 
+            . Networks 
+                . Default, auto mode, custom mode 
+            . Subnetworks -> allow to divide or segregate the env. Work on a reginal scale.
+            . Regions 
+            . Zones 
+            . IP addresses 
+                . Internal, external, range 
+            . Virtual machines 
+            . Routes 
+            . Firewall rules 
+
+    -- Projects, networks and subnetworks
+        - A project:
+            . Associate objects and serivices with billing 
+            . Contains networks (up to 15) that can be shared/peered 
+            
+
+        - A network:
+            . Has no IP address range
+            . Is global and spans all available regions 
+            . Contains subnetworks 
+            . Is available as defaut, auto, or custom 
+
+            * Default:
+                . Every project 
+                . One subnet per region 
+                . Default firewall rules 
+            * Auto MOde:
+                . Default network 
+                . One subnet per region 
+                . Regional IP allocation 
+                . Fixed /20 subnetwork per region
+                . Expandable up to /16
+
+            * Custom Mode:
+                . No defaut subnets created 
+                . Full control of IP ranges 
+                . Regional IP allocation 
+                . Expandable to IP ranges we specify 
+
+            -> Note: Google Cloud now support IPv6 !
+
+        * Because VM instances within a VPC network can communicate privately on a global scale, a single VPN can securely connect our on-premises
+          network to your Google Cloud network.
+        
+        * Subnetworks can extend across  zones within the same region.
+
+        - Demo: Expand a subnet 
+            . To expand a subnet we have just to change the network  mask (for example from /29 to /23)
+        
+
+    -- IP addresses:
+        - Internal IP:
+            . Allocated from subnet to VMs by DHCP 
+            . DHCP lease is renewed every 24 hours 
+            . VM name + IP is registred wiht network-scoped DNS 
+
+        - External IP:
+            . Assigned from pool (ephemeral)
+            . Reserved (static)
+            . Bring Your Own IP address (BYOIP)
+            . VM doesn't know external IP; it is mapped to the internal IP 
+
+    -- Mapping IP address:
+        - DNS resolution for internal addresses 
+            Google cloud has two types of internal DNS:
+                . Zonal
+                . Glabal 
+            Each instance has a hostname that can resolved to and internal IP address:
+                . The hostname is the same as the instance name 
+                . FQDN is [hostname].[zone].c.[projec-id].internal 
+                Ex: myserver.us-central1-a.c.guestbook-15617.internal 
+
+            Name resolution is handled by internal DNS resolver:    ------------ search about this after ------------
+                . Provided as part of Compute Engine (169.254.169.254)
+                . Configured for use one instance via DHCP 
+                . Porivides answer for internal and external addresses 
+        
+        - DNS resolution for external addresses 
+            . DNS records for external addresses can be published using existing DNS servers (outisde of Google Cloud)
+            . DNS zones can be hosted using Cloud DNS 
+                . Google's DNS service 
+                . Translate domain names into IP address 
+                . Low latency 
+                . High availability (100% uptime SLA)
+                .  Create and update millions of DNS records 
+        
+        * We can assign a range fo IP adresses as aliases to a VM's network interface using alias IP ranges. This  is useful if we 
+          have multiple services running on a VM, and we want to assign a different IP address to each service.
+
+    -- Routes and firewall:
+        - A route is a mapping of an IP range to a destinantion 
+        - Firewall rules proctect VM instances from unapproved connnections
+            . VPC network functions as distributed firewall 
+            . Firewall rules are applied to the network as a whole 
+            . Connections are allowed or denied at the instance level 
+            . Firewall rules are stateful.
+            . Implied deny all ingress and allow all egress 
+
+            -> A firewall rule is composed of:
+                . direction 
+                . source or destination 
+                . protocol and port 
+                . action -> to allow or deny packets that match configs
+                . priority -> remember : Higher interger indicate low priority 
+                . Rule assignement -> assinged to all instances(by default) or certain instances only 
+
+        - Google Cloud Firewall use case: Egress || Ingress
+            Conditions:
+                . Destination CIDR (Classless Inter-Domain Routing) ranges 
+                . Protocols 
+                . Ports 
+            Action: 
+                . Allow ->  permit matching egress || ingress connection 
+                . Deny -> block matchin egress || ingress connection 
+            
+    -- LAB: VPC Networking 
+        mynet-notus-vm : 35.244.45.175
+        management-net-us-vm : 34.60.7.223
+        privatenet-us-vm : 34.171.209.186
+
+        ---------------------------------------------------
+        We'll back on this to takes notes 
+        ---------------------------------------------------
+
+
+=== Common Network designs ===
+    . Inreased availability with multiple zones 
+    . Globalization with multiple regions 
+
+    * Cloud NAT is google's managed network address translation service 
+
+    -> Private Google Acess to Google APIs and services:
+        . We should enable Private Google Access to allow VM instances that only have internal IP addresses to reach 
+          the external IP addresses of Google APIs and services.
+        . Private Google Access has no effect on instances that have external IP addresses
+    
+ 
+    
+=== Virtual Machines ===
+    . Private Google Access has no effect on instances that have external IP addresses
+    . Some VMs offer burst capability, meaning that the virtual CPU will run above its rated capacity for a brief period,
+      using the available shared physical CPU (this cannot exist in physical hardware).
+    
+    -- Compute Engine:
+        - Tensor Processing Unit (TPU):
+            Allow for higher efficiency 
+
+        - Compute: 
+            . Diks: Stardard, SSD, or Local SSD
+            . Strandard and SSD PDs scale in performance for each GB of space allocated 
+            . Local SSDs have higher throughput and lower latency than SSD persistent disks, because they are attached to the 
+              physical hardware; however, the data stored on local SSDs persists only until the instance is stoped or deleted.  
+
+        
+        - Networking:
+            . Auto, custom networks 
+            . Inboud/Oubound firewall rules 
+                - IP based 
+                - Instance/group tags
+            . Application Load Balancing 
+            . Network Load Balancing 
+                - Does not require pre-warming 
+            . Global and multi-regional sbnetworks
+
+
+    -- VM acess and lifecycle:
+
+
+
+
+        
+
+        
+
+
+
+            
+
+
+
+
+
+
+
+    
