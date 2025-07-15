@@ -1,12 +1,14 @@
 === Module 4 -> Essential Google Cloud Infrastructure: Foundation ===
 
---- Extra notes:
+--- Other notes:
     By default, Compute Engine adds the generated key to project or instance metadata.
     If your account is configured to use OS Login, Compute Engine stores the generated key with your user account
     It's recommanded to use curstom mode network in production 
 
         -> Search 
-    -----------------------------------------------------
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+    * Do more research about discount 
+
     Note that the IP CIDR ranges of these networks do not overlap. This allows you to set up mechanisms such as 
     VPC peering between the networks. If you specify IP CIDR ranges that are different from your on-premises network, 
     you could even configure hybrid connectivity using VPN or Cloud Interconnect.
@@ -18,7 +20,22 @@
     This allows for higher efficiency by tailoring architecture to meet the computation needs in a domain, such as the matrix multiplication in machine learning.
 
     Cloud TPUs have been integrated across Google products, making this state-of-the-art hardware and supercomputing technology available to Google Cloud customers. 
-    -----------------------------------------------------
+
+    Compute Engine can live migrate virtual machine to another host due to a maintenance event to prevent applications from experiencing disruptions.
+
+    To take advantage of the full 30% discount, create your VM instances on the first day of the month, because discounts reset at the beginning of each month.
+
+    screen, an application that allows you to create a virtual terminal that can be "detached," becoming a background process, or "reattached," becoming a foreground process.
+
+    A Minecraft server is a multiplayer game server that allows players to connect and play together online or over a local network. 
+
+    Note: To make this environment variable permanent, you can add it to the root's .profile by running this command:
+    echo YOUR_BUCKET_NAME=$YOUR_BUCKET_NAME >> ~/.profile
+
+    ** Cloud IAP tunnel. Cloud IAP enables context-aware access to VMs via SSH and RDP without bastion hosts
+
+    34.27.244.140
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 === Course Introduction ===
@@ -315,13 +332,202 @@
             . Global and multi-regional sbnetworks
 
 
-    -- VM acess and lifecycle:
+    -- VM access and lifecycle:
+        - Access:
+            . Linux -> SSH (require firewall rule to allow tcp:22)
+            . Windows -> RDP (require firewall rule to allow tcp:3389)
+        - Lifecycle: 
+                                                 '<-> Reparing -> Suspending -> Suspended
+            . Provisioning -> Staging -> Running '
+                                                 '-> Suspending -> Suspended 
+
+            . Patch management:
+                - to keep infrastructure up-to-date 
+                - Reduce the risk of security vulnerability 
+
+    -- LAB: Create VMs 
+        Some useful commands:
+            - free -> to see information about used and unused memory  and a custom vm
+            - sudo dmidecode -t 17 -> to see details abou the RAM installed on the VM 
+            - nproc -> verify number of processors 
+            - lscpu -> details about cpu installed on the vm 
+
+    -- Compute options
+        Machine type structure:
+            - Machine family:
+                * General-purpose 
+                    - E2 (cost-optimized)
+                        . Microservices 
+                        . Virtual Desktops 
+                        . Development env.
+
+                    - N2, N2D, N1 (Balanced price/performance)
+                        . Medium-large databses 
+                        . Cache 
+                        . Media/Streaming 
+                        
+                    - Tau T2D, Tau T2A -> (Sacle-out optimized; Best performance/cost for scale-out workloads)
+                        . Media transcoding 
+                        . Large-scale Java applications 
+
+                * Compute-optimized 
+                    - C2 (Ultra high performance for compute-intensive workloads)
+                        . High-performance computing 
+                        . Media transcoding 
+                        . AI/ML 
+                    - C2D (Utra high-performance for compute-intensive workloads) 
+                        . High-performance databases 
+                        . Electronic Design Automation (EDA)
+                        . Media transcoding 
+                    - H3 (Utra high-performance for compute-intensive workloads)
+                        . EDA
+
+                * Memory-optimized
+                    - M1 (Uttra high-memory workloads)
+                        . In-memory databases, ...
+                        
+                    - M2 (Uttra high-memory workloads)
+                        . In-memory databases, ...
+                * Accelerator-optimized
+                    - A2 (optimized for high-performance computiong workloads)
+                        . CUDA-enabled ML training and inference 
+                        . HPC 
+                        . Massive parallelized computation 
+                    - G2 (optimized for high-performance computiong workloads)
+                        . Video transcoding 
+                        . Remote visualization workstation 
+                    
+            - Machine series:
+            - Machine type:
+
+
+    -- Compute Pricing:
+        - Per-seond billing, with minimu of 1 minute
+            . vCPUs, GPUs, and GB of memory 
+        - Resource-based pricing 
+            . Each vCPU and each GB of memory is billed separately 
+        - Discounts:
+            . Sustained use 
+            . Commited use 
+            . Preemptible VM instances 
+        - Recommendation Engine:
+            . Notifies us of underutilized instances 
+        - Free usage limits 
+
+
+-- Sepecial Compute Configurations:
+    - Preemptible
+        . Lower price for interruptible service (up to 91%)
+        . VM migh be terminated at any time 
+            . not charge if terminated in the first minute 
+            . 24 hours max 
+            . 30-second terminate waring, but not guranteed 
+            . No live migrate; no auto restart
+
+    - Sport VMs 
+        . They are the latest version of preemptilbe VMs 
+        . Both share the same princing model 
+    
+    - Sole-tenant nodes physcially isolate workloads
+        Use keep your instances physically separated from instances in other projects, or to group your instances 
+        together on the same host hardware.
+
+    - Shielded VMS offer verifiable integrity 
+        . Secure Boot 
+        . Virtual trusted platform module (vTPM)
+        . Integrity monitoring 
+
+    - Confidential VMS allow to encryt data in use 
+        . Encrypts data while it's being processed 
+        . N2D compute engine VM 
+        . Provides high memory capacity 
+
+
+-- Images
+    * What's an image ? It include :
+        . Boot laoder 
+        . Operating Sysem 
+        . File System sttrucutre 
+        . Software 
+        . Customizations 
+
+
+-- Disks opitons:
+    - Persisting disks (HDD and SSD-> more performance)
+        . Attached to a VM through the network interface 
+        . Durable storage: can survive when vm terminate 
+        . Bootable, whe can attach to a VM and boot form it 
+        . Snapshotes: incremental backups 
+        . Performance: Scales with size 
+        . Disk resizing: even running an attached!
+        . Can be attached in read-only mode to mutiple VMS 
+        . Zonal or Regional 
+
+    - Local SSD Disks (pyhyscally attached to a VM)
+        . More IOPSj, lower latency, and higher throughput than persistent disk 
+        . 375-GB disk up to 24, total of 9TB per instance 
+        . VM-specific: connot be reattached to a different VM
+    
+    - RAM disk
+        . tmpfs -> to store data in memory 
+        . Faster than local disk, slower than memory 
+            -> To use when application expects a file system strucuture and connot directly store its data memory 
+            ->  Fast scratch disk, or fast cache 
+        . Very volatile; erase on stop or restart 
+        . May need a large machine type if RAM was sized for the application 
+        . Consider using a persistent disk to back up RAM disk data 
+
+
+-- Common Compute Engine actions:
+    - Metadata and scripts:
+        . Every VM instance stores its metadata on a metatdata server. 
+        . Metadata <- Boot | Run | Maintenance | Shutdown 
+
+    - Move an instance to a new zone or region:
+        To move a VM, we must shut down the VM, move it to the destination zone or region, and then restart it.
+    
+    - Snapshot: Backup critical data 
+        . to backup critical data into a durable storage solution to meet application, availability, and recovery requirements.
+        . Snapshots are stored in Cloud Storage 
+    
+    - Snapshot: Migrate data between zones 
+        We might want to minimize latency by migrating data to a drive that can be locally attached in the zone where it is used.
+    
+    - Snapshot: Transfert to SSD to improve performance 
+        If we want to improve disk performance, we could use a snapshot to transfer data from a standard HDD persistent disk to a SSD persistent disk.
+
+    - Persistent disk snapshots: 
+        - Snapshortisjnot available for local SSD 
+        - Creates and incremental backup to Cloud Storage 
+            . Not visible in our buckets; managed by the snapshot service. 
+        - Create scheduled snapshots 
+            . we can to this to regularly and automatically backup our zonal and regional persistent disks 
+        - Snapshots can be restored to a new persistet disk 
+                ! Snapshots doesn't back up metadata, tags, ect.
+
+        - Resize persistent disk 
+
+
+    -- LAB: Working withe VMs 
+        ---------------------
+        Have to take notes after 
+        ---------------------
+
+        Cloud NAT logging allows you to log NAT connections and errors. When Cloud NAT logging is enabled, one log entry can be generated for each of the following scenarios:
+            When a network connection using NAT is created.
+            When a packet is dropped because no port was available for NAT.
+
+            Logs not generated !!!
+
+            By default, instance owners are the only users that have the IAP Secured Tunnel User role.
 
 
 
 
+-- Quiz: 
+    . What are sustained discount ? 
+        Answer : Automatic discounts that you get for running specific Compute Engine resources for a significant portion of the billing month
         
-
         
 
 
