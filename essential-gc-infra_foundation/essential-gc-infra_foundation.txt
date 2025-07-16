@@ -1,42 +1,4 @@
-=== Module 4 -> Essential Google Cloud Infrastructure: Foundation ===
-
---- Other notes:
-    By default, Compute Engine adds the generated key to project or instance metadata.
-    If your account is configured to use OS Login, Compute Engine stores the generated key with your user account
-    It's recommanded to use curstom mode network in production 
-
-        -> Search 
-    ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-    * Do more research about discount 
-
-    Note that the IP CIDR ranges of these networks do not overlap. This allows you to set up mechanisms such as 
-    VPC peering between the networks. If you specify IP CIDR ranges that are different from your on-premises network, 
-    you could even configure hybrid connectivity using VPN or Cloud Interconnect.
-
-    * Therefore, no internal IP address communication is allowed between networks, unless you set up mechanisms such as VPC peering or VPN.
-
-    TPUs are Google’s custom-developed application-specific integrated circuits used to accelerate machine learning workloads.
-    TPUs act as domain-specific hardware, as opposed to general-purpose hardware with CPUs and GPUs.
-    This allows for higher efficiency by tailoring architecture to meet the computation needs in a domain, such as the matrix multiplication in machine learning.
-
-    Cloud TPUs have been integrated across Google products, making this state-of-the-art hardware and supercomputing technology available to Google Cloud customers. 
-
-    Compute Engine can live migrate virtual machine to another host due to a maintenance event to prevent applications from experiencing disruptions.
-
-    To take advantage of the full 30% discount, create your VM instances on the first day of the month, because discounts reset at the beginning of each month.
-
-    screen, an application that allows you to create a virtual terminal that can be "detached," becoming a background process, or "reattached," becoming a foreground process.
-
-    A Minecraft server is a multiplayer game server that allows players to connect and play together online or over a local network. 
-
-    Note: To make this environment variable permanent, you can add it to the root's .profile by running this command:
-    echo YOUR_BUCKET_NAME=$YOUR_BUCKET_NAME >> ~/.profile
-
-    ** Cloud IAP tunnel. Cloud IAP enables context-aware access to VMs via SSH and RDP without bastion hosts
-
-    34.27.244.140
-    ---------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+                    === Module 4 -> Essential Google Cloud Infrastructure: Foundation ===
 
 === Course Introduction ===
 
@@ -283,14 +245,41 @@
                 . Deny -> block matchin egress || ingress connection 
             
     -- LAB: VPC Networking 
-        mynet-notus-vm : 35.244.45.175
-        management-net-us-vm : 34.60.7.223
-        privatenet-us-vm : 34.171.209.186
+        * Task 1: Create VM instance 
+            - Create custom  VPC network with firewall rule 
+            - Create the vm instance with no public IP address (-> vm-internal)
+            - Connect to the vm 
+                . gcloud compute ssh vm-internal --zone ZONE --tunnel-through-iap
+            - We tested external connectivity with ping, and it does not work (nomal)
 
-        ---------------------------------------------------
-        We'll back on this to takes notes 
-        ---------------------------------------------------
+        * Task 2: Enable Private Google Access 
+            - Create a cloud storage bucket 
+            - Copy an image file into the bucket 
+                At this state only cloud-shell can access the imagej, and not the vm. 
+            - Copying image to the vm fail because then vm can not acces to google API yet 
+            - Enable Private Google Access 
+                . PGA is enabled at the subnet level
+                . We edited settings of our subnet and turn 0n Private Google acces 
+                * Now we're done, the world is happy !
 
+        * Task 3: Configure a Cloud NAT gateway 
+            -> vm-internal can now access certain Google APIs and services without an external IP address, the instance cannot 
+            access the internet. Configuring a Cloud NAT gateway will allow this:
+             
+            - On the Google Cloud console title bar, we type Network services in the Search field, then click Network services 
+              in the Products & Page section.
+            - We select Cloud NAT and create the gateway (nat-config) (associating it to the concerned network -> privatenet here)
+            - For Cloud Router we select "Create new router" 
+
+        * Task4: Configure and view logs with Cloud NAT Logging:
+            - Enabling logging
+                In Cloud NAT, we click on the nat-config gateway and then click Edit "Advanced configurations" -> "Loggin" to select 
+                "Translation and errors" 
+            - Generating logs 
+                . apt-update on the vm instance 
+            - Viewing logs 
+                . We return to the Logs Explorer tab, and in the navigation menu, click "Logs Explorer"
+            
 
 === Common Network designs ===
     . Inreased availability with multiple zones 
@@ -508,36 +497,94 @@
         - Resize persistent disk 
 
 
-    -- LAB: Working withe VMs 
-        ---------------------
-        Have to take notes after 
-        ---------------------
+    -- LAB: Working with VMs:
+        * Task 1:
+            - Create the vm: 
 
-        Cloud NAT logging allows you to log NAT connections and errors. When Cloud NAT logging is enabled, one log entry can be generated for each of the following scenarios:
+        * Task 2: 
+            - Create a  directory that serve as mount point mount point for the data disk 
+                . sudo mkdir -p /home/minecraft 
+            - Format the disk 
+                . sudo mkfs.ext4 -F -E lazy_itable_init=0,lazy_journal_init=0,discard /dev/disk/by-id/google-minecraft-disk
+            - Mount the disk 
+                . sudo mount -o discard,defaults /dev/disk/by-id/google-menecraft-disk /home/minecraf
+        
+        * Task 3:
+            - We navigated to the directory where the disk is mounted and downloaded and initilized minecraft server 
+
+        * Task 4:
+            - We created a firewall rule to allow client trafic for tcp:25565  -> default minecraf port 
+        
+        * Task 5:
+            - Schedule regular backups 
+                . Create a bucket in Cloud Storage 
+                . ceated buckup.sh file where buckup script is writted 
+                . We make the script executable with chmod 755 /home/minecraft/backup.sh
+                . We schedule a cron job that do back up every four hours 
+                    - sudo crontab -e
+                    - 0 */4 * * * /home/minecraft/backup.sh -> this line is added to the end of the file 
+
+        * Task 6: Server maintenance 
+            - Connect to the server and shut down the vm 
+            - Automate server maintenance with startup and shutdown scripts 
+                Instead of following the manual process to mount the persistent disk and launch the server application in a screen,
+                we can use metadata scripts to create a startup script and a shutdown script to do this
+
+                . On mc-server vm, we added on Metadata, twos item:
+                    key: startup-script-url   value: https://storage.googleapis.com/cloud-training/archinfra/mcserver/startup.sh
+                    key: shutdown-script-url  value: https://storage.googleapis.com/cloud-training/archinfra/mcserver/shutdown.sh
+                
+
+
+        Cloud NAT logging allows to log NAT connections and errors. When Cloud NAT logging is enabled, one log entry can be generated for each of the following scenarios:
             When a network connection using NAT is created.
             When a packet is dropped because no port was available for NAT.
 
-            Logs not generated !!!
-
-            By default, instance owners are the only users that have the IAP Secured Tunnel User role.
+        * By  default, instance owners are the only users that have the IAP Secured Tunnel User role.
 
 
-
-
--- Quiz: 
-    . What are sustained discount ? 
-        Answer : Automatic discounts that you get for running specific Compute Engine resources for a significant portion of the billing month
-        
+    -- Quiz: 
+        . What are sustained discount ? 
+            Answer: Automatic discounts that you get for running specific Compute Engine resources for a significant portion of the billing month
+            
         
 
 
 
             
+--- Other notes:
+    By default, Compute Engine adds the generated key to project or instance metadata.
+    If your account is configured to use OS Login, Compute Engine stores the generated key with your user account
+    It's recommanded to use curstom mode network in production 
 
+        -> Search 
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+    * Do more research about discount 
 
+    Note that the IP CIDR ranges of these networks do not overlap. This allows you to set up mechanisms such as 
+    VPC peering between the networks. If you specify IP CIDR ranges that are different from your on-premises network, 
+    you could even configure hybrid connectivity using VPN or Cloud Interconnect.
 
+    * Therefore, no internal IP address communication is allowed between networks, unless you set up mechanisms such as VPC peering or VPN.
 
+    TPUs are Google’s custom-developed application-specific integrated circuits used to accelerate machine learning workloads.
+    TPUs act as domain-specific hardware, as opposed to general-purpose hardware with CPUs and GPUs.
+    This allows for higher efficiency by tailoring architecture to meet the computation needs in a domain, such as the matrix multiplication in machine learning.
 
+    Cloud TPUs have been integrated across Google products, making this state-of-the-art hardware and supercomputing technology available to Google Cloud customers. 
 
+    Compute Engine can live migrate virtual machine to another host due to a maintenance event to prevent applications from experiencing disruptions.
 
-    
+    To take advantage of the full 30% discount, create your VM instances on the first day of the month, because discounts reset at the beginning of each month.
+
+    screen, an application that allows you to create a virtual terminal that can be "detached," becoming a background process, or "reattached," becoming a foreground process.
+
+    A Minecraft server is a multiplayer game server that allows players to connect and play together online or over a local network. 
+
+    Note: To make this environment variable permanent, you can add it to the root's .profile by running this command:
+    echo YOUR_BUCKET_NAME=$YOUR_BUCKET_NAME >> ~/.profile
+
+    ** Cloud IAP tunnel. Cloud IAP enables context-aware access to VMs via SSH and RDP without bastion hosts
+
+    ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
