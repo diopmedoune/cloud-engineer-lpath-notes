@@ -1,0 +1,226 @@
+==== Module 05 - Essential GCI: Core Services ===
+
+----------------------------------------------------------------------------------------
+You will grant the user the role of Service Account User, which allows that person to use a service account on a VM
+if they have access to the VM. You could perform this activity for a specific user, group, or domain.
+----------------------------------------------------------------------------------------
+
+== IAM  (Identity and Acess Managemnt) ==   
+    * IAM is a way of identifying who can do what on which resource 
+    - IAM objects and -> resource hierarchy:
+        . Organization -> root node; it repersent the company
+        . Folders -> children of the Organization; they may be departments 
+        . Projects -> children of folders 
+        . Resources -> children of projects; Compute Engine, Cloud Storage, ...
+        . Roles 
+        . Members 
+
+    
+    --- Organization:
+        * Organization node:
+            - Organization roles:
+                . Organization Admin
+                . Project Creator 
+         
+        * Creating and managing organtions 
+            - Google Workspace or Cloud Identity super admnistrator:
+                . Assign the organization admin rule to some users 
+                . Be the point of contact in case of recovery issues 
+                . Control the lifecycle of the GW or CI account and org. resource
+            
+            - Organization admin:
+                - Define IAM poliies 
+                - Determine the structure of the resource hierarchy 
+                - Delegate responsability over crical components such as networking, billing, and 
+                  resource hierarchy through IAM roles.
+                
+            - Folders:
+                . The top level folder can repersent departments 
+                . Subfolders can repersent teams 
+                . Each teamn folder could contain additionnal subfolders to repersent differents apps
+
+
+        * Resource manager roles: Policy  Inheritance 
+            - Organization
+                . Admin: Full control over all resources 
+                . Viewer: View access to all resources 
+            - Folder
+                . Admin: Full control over folders 
+                . Creator: Browse hierarchy and create folders 
+                . Viewer: View folders and projects below resource 
+            - Project 
+                . Creator: Create new porjects (automatic owner) and migrate new projects into org. 
+                . Deleter: Deleter projects 
+
+    ---  Roles: 
+        There are three types of roles:
+        * Basic
+            - Owner 
+                . Invite members 
+                . Remove members 
+                . Delete projects
+                . And ...
+            - Editor 
+                . Deploy applications 
+                . Modify code 
+                . Configure services 
+                . And ...
+            - Viewer
+                . Read-nly access
+            - Billing Administrator 
+                - Manage billing 
+                - Add and remove administrators  
+        * Predifined 
+            This roles  apply to a particular Google Cloud service in a project 
+            - Compute Engine IAM roles:
+                . Compute Admin: Full control of all Compute Engine resources (compute.*)
+                . Network Admin: Permissions to create, modify and delete networking resources except
+                  for firewall rules and SSL certificates 
+                . Storage Admin: Permessions to create, modify and delete disks, image, and snapshots  
+
+        * Custom 
+            Custom role let define a pricise set of permissions 
+
+    --- Members:
+        * They difine "who can do what on which resource" 
+        There are five differents types of members:
+            - Google Account -> userid@gmail.com
+            - Service Account -> 12345678@cloudserices.gservicesaccount.com
+                . An account that bilongs to our application instead of and endividual end user 
+            - Google Group -> groupname@googlegroups.com 
+                . It's a named collection of Google Accounts and service accounts
+            - Cloud Identy -> alias@example.com 
+                . It let us manage users and groups using google admin console.
+            - Google Workspace Domain -> alias@example.com 
+                . It represent the organization's internet domain name.
+
+        * IAM policies:
+            . A policy consists of list of bindings 
+            . A binding binds a list of memebers to a role 
+
+            . Each policy contains a set of role and role members, with resources inheriing policies from their parent.
+
+            . Resource policies are a union of parent and resource, where a less restrictive parent policy will always 
+             override a more restrictive resource policy.
+
+        * IAM allow policies:
+            . Grant access to Google Cloud ressources 
+            . Controle access to the resouce itself, as well as any descendant of that resource 
+            . Associate, or binds one ore more principals (also know as a member or identity) with a single IAM role 
+        
+        * IAM den policies:
+            . Prevent certain principals from using certain permissions, regardless of the roles they're granted (this
+              is becauseIAM always checks relevant deny policies before checking relevant allow policies)
+            . Optional: the condition that must be true for the permission to be denied 
+
+
+        * IAM Conditions:
+            They allow to define and enforce conditional attribute-based access control for Google Cloud resources.
+            . Grant resource access to identies (members) only if cconfigured conditions are met.
+            . Specified in the role bindings of a resource's IAM policy. 
+
+        * Organization policies:
+            . A configuration of restrictions 
+            . Defined by configuring a constraint with the disired resctrictions 
+            . Applied to the organization node, folders or projects.
+
+
+        * Google Cloud Directory Sync is designed to run scheduled synchronizations without supervision, after its synchronization
+          rules are set up.
+
+        * Single sign-on (SSO): --------- Have to do more research about this section ---------
+            . Use Cloud Identity to configure SAML SSO
+            . If SAML2 isn't supported, use a third-party solution (ADF2, Ping, or Okta)
+
+
+    --- Service Accounts:
+        - They provide an identity for carrying out service-to-service interactions; Identified by an email address
+        - Programs running within Compute Engine intances can automatically acquire access tokens with credentials.
+        - Tokens are used to acces an service API in our project and any other services that granted access to that service account.
+        - Service account are convenient when we're not accessing user data.
+
+        * Three types of services accounts:
+            - User-created (custom)
+            - Built-in 
+                . Compute Engine and App Engine default service accounts 
+            - Google APIs service account:
+                . Runs internal Google processes on your behalf 
+
+            ! By default, Compute Engine service account is automatically created per project with auto-generated name and email address.
+            ! Before the existence of IAM roles, access scopes were the only mechanism for granting permissions to service accounts.
+        
+        * Service account permissions:
+            - Default service accounts: basic and predefined roles 
+            - User-created service accounts: predifined roles 
+            - Roles for service accounts can be assigned to groups or users 
+
+            ! Users who are Service Account Users for a service account can access all the resources that the service account has access to.
+
+        *  Two types of service accounts keys:
+            - Google-managed service accounts 
+                . All service accounts have google-managed keys.
+                . Google store both the public and private portion of the key 
+            - User-managed service accounts:
+                . Google only store the pubic portion of the user-managed key 
+                . Users are responsible for the private key security 
+                . Can be administrated  via the IAM API, gcloud, or the console.
+            
+    --- Organization Restrictions:
+        - They let us prevent data exfiltration through phishing or insider attacks.
+        - An egress proxy administrator configures the proxy to add organization restrictions headers to any requests originating from a managed 
+          device.
+        - They can also be used to allow  employeees to read a vendor Google Cloud organization in additionnal of our GC organization
+
+
+    --- IAM best practicies:
+        * Leverage and understand the resource hierarchy 
+            - Use projects to group resources that share the same trust boundary 
+            - Check the policy granted on each resource and make sure we understand the Inheritance 
+            - Use "principles of least privilege" when granting roles 
+            - Audit policies in Cloud Audit Logs: setiapolicy.
+            - Audit membership of groups used in policies 
+
+        * Grant roles to Google groups instead of individuals 
+            - Update group membership instead of changing IAM policy
+            - Audit membership of groups used in policies *
+            - Control the ownership of the Google group used in IAM policies 
+        
+        * Service accounts 
+            - Be very careful granting serviceAccountUser role. 
+            - When we create a service account, we have to give it a display name that clearly identifies its purpose 
+            - Establish a naming convention for service accounts 
+            - Audit with serviceAccount.keys.list() method 
+
+        * Identity-Aware Proxy (IAP)
+            It lets us establish a central authorization layer for applications accessed by HTTPS, so we can use an application level access 
+            control model instead of relying on network-level firewalls.
+            . Identity-based access control 
+            . Central authorization layer for applications accessed by HTTPS 
+
+            IAM policies is applied after authentication.
+
+            
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
