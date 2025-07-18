@@ -1,10 +1,5 @@
 ==== Module 05 - Essential GCI: Core Services ===
 
-----------------------------------------------------------------------------------------
-You will grant the user the role of Service Account User, which allows that person to use a service account on a VM
-if they have access to the VM. You could perform this activity for a specific user, group, or domain.
-----------------------------------------------------------------------------------------
-
 == IAM  (Identity and Acess Managemnt) ==   
     * IAM is a way of identifying who can do what on which resource 
     - IAM objects and -> resource hierarchy:
@@ -198,29 +193,454 @@ if they have access to the VM. You could perform this activity for a specific us
             . Central authorization layer for applications accessed by HTTPS 
 
             IAM policies is applied after authentication.
+        
+    --- LAB:
+        In this lab we granted and revoked IAM roles first to à standard user and then to Service Account User. We tested all privilege of 
+        this users with the roles they are associated.
 
+
+== Storage and Database Services ==   
+    --- Cloud Storage (Object)
+        - Good for Binary or object data such as Images, media serving , backups 
+        
+        * Overview fo storage classes:
+            - Standard -> 
+                . No Mininum Storage duration 
+                . Retrievale cost: None 
+            - Nearline 
+                . Mininum Storage duration: 30 days 
+                . Retrievale cost: $0.01 per GB
+            - Coldline 
+                . Mininum Storage duration: 90 days
+                . Retrievale cost: $0.02 per GB 
+            - Archive
+                . Mininum Storage duration: 356 days 
+                . Retrievale cost: $0.05 per GB 
+
+        * Changing default storage classes:
+            - Default class is applied to new objects 
+            - Regional bucket can never be changed to multi-Regional/Dual-Region and vis-versa 
+            - Objects can be moved from bucket to bucket 
+            
+        * Access control   
+            - [Project -> (Bucket) -> (Object)]
+                . IAM 
+                . ACLs -> mechanism do define who has access to our bucket and objects 
+                . Signed URL -> provide a crytographic key that give times-limited access to a bucket or object 
+                . Signed Policy Document -> refines the control by dertermiing what kind of file can be uploaded by someone with signed URL.
+
+        * Soft Delete overview 
+            - Provide default bucket-level protection from:
+                . Accidental deletion 
+                . Malicious deletion 
+            - Retains overwritten or changed data
+            - Is enabled by default with a 7 days retention duration  (can be change with value between 0-90 day.s)
+
+        * Object Lifecycle Management policies : 
+            - It specify action to be performed on objects that meet certain rules 
+                . Delete object created before a specific date 
+                . Keep only 3 most recent version of an object 
+                ! Changes can take 24 hours to apply.
+        
+        * Object Retention Lock 
+            - Lets us difine data rention requirements on a per-object basis
+            - Retention configuration governs how long the object must be retained 
+
+        * Choosing a storage class 
+            - Autoclass storage in Google Cloud 
+                . It transitions objects in our bucker to appopriate storage classes based on the access part of each objects 
+
+
+        *** LAB: Cloud Storage 
+            * Task1: Preperation 
+                - Download a sample file using curl and make two copies | setup.html + setup2.html + setup3.html
+
+            * Task2: Access Control Lists (ACLs)
+                . gcloud storage cp setup.html gs://$BUCKET_NAME_1/
+                . gsutil acl get gs://$BUCKET_NAME_1/setup.html  > acl.txt && cat acl.txt
+
+                . gsutil acl set private gs://$BUCKET_NAME_1/setup.html  --> set the access list to private
+                . gsutil acl get gs://$BUCKET_NAME_1/setup.html  > acl2.txt && cat acl2.txt
+
+                . gsutil acl ch -u AllUsers:R gs://$BUCKET_NAME_1/setup.html --> update the acl to make the file publicly readable
+                . gsutil acl get gs://$BUCKET_NAME_1/setup.html  > acl3.txt && cat acl3.txt
+
+                - At this stage we can delete the local files and copy back from Cloud Storage 
+            
+            * Task 3: Customer-supplied encryption keys (CSEK) ------------------ Have to do more reserach about this ------------------
+                In this task we generate CSEK Key to encrypt files Cloud Storage 
+                . python3 -c 'import base64; import os; print(base64.encodebytes(os.urandom(32)))' -> gnerate key 
+                . We modify the .boto file to add the key (encryption_key variable)
+                . Then we upload the remaining setup files and in the Cloud Console -> uploaded files show that they are customer-encrypted 
+            * Task 4: Rotate CSEK keys
+                - Move the current CSEK encrypt key to decrypt key 
+                - Generate another CSEK key and add to the boto file
+                - Rewrite the key for file 1 and comment out the old decrypt key   
+                    When a file is encrypted, rewriting the file decrypts it using the decryption_key1 that we previously set, and encrypts 
+                    the file with the new encryption_key.
+                    . gsutil rewrite -k gs://$BUCKET_NAME_1/setup2.html
+                - Download setup 2 and setup3
+                    -> error with setup3.thml because it was not rewritten with the new key, so it can no longer be decrypted, and the copy will fail.
+            * Task 5: Enable lifecycle management 
+                . gsutil lifecycle get gs://$BUCKET_NAME_1 -> View the current lifecycle policy 
+                . create a json life cycle policy -> nano life.json (we set poly to delete object after 31 days)
+                . gsutil lifecycle set life.json gs://$BUCKET_NAME_1 && gsutil lifecycle get gs://$BUCKET_NAME_1 --> set the policy and verify 
+
+            * Task6: Enable versioning 
+                . gsutil versioning get gs://$BUCKET_NAME_1 -> show current versioning status 
+                . gsutil versioning set on gs://$BUCKET_NAME_1 -> enable versioning
+                - Create several version of the file (by modifying it each time)
+                    . gcloud storage cp -v setup.html gs://$BUCKET_NAME_1
+                . gcloud storage ls -a gs://$BUCKET_NAME_1/setup.html -> List all verison of the file 
+            * Task7: Synchronize a directory to a bucket 
+                . gsutil rsync -r ./firstlevel gs://$BUCKET_NAME_1/firstlevel
+
+    --- Filestore (File)
+        - GF Network attached storage such as lantency sensitive workloads 
+
+        . Fully manged network attached storage (NAS) for Compute Engine, GKE instances 
+        . Predictable performance 
+        . Full NFSv3 support 
+        . Scales to 100s of TBs for high-performance workloads 
+
+        * Filestore use cases:
+            - Applicaiton migration 
+            - Media rendering 
+            - Electronic Design Automation (EDA)
+            - Data analytics 
+            - Genomics processing 
+            - Web content Management
+
+    --- Cloud SQl (Relational)
+        - GF web frameworks such as CMS, ecommerce
+
+        . It is a fully managed database and service  (MySQL, PostgreSQL, or Microsoft SQL Server)
+        . Patches an updates automatically applied 
+        . we administer MySQL users 
+        . Cloud SQL support many clients 
+            - gcloud sql 
+            - App Engine, Google Workspace scripts 
+            - Applications and tools 
+                . SQL Workbench, Toad 
+                . External applications using standard MySQL drivers 
+            
+        * Performance:
+            - 64 TB of storage 
+            - 60,000 IOPS  (Input/Output Operations Per Seconds)
+            - 624 GB of RAM 
+            - Scale out with read replicas 
+
+        * Cloud SQL services 
+            - HA configuration 
+            - Backup service 
+            - Import/Export 
+            - Sacling   
+                . Up: Machine capacity 
+                . Out: Rread replicas 
+
+        * Connection to a google cloud instance:
+          If we’re connecting an application that is hosted within the same Google Cloud project as our Cloud SQL instance, 
+          and it’s collocated in the same region, choosing the Private IP connection will provide us with the most performant
+          and secure connection using private connectivity. 
+        
+          - Connection form within Google Cloud 
+            -> Use Cloud SQL Private IP 
+          - Connecting form outside Google Cloud 
+                - Need manual control over SSL certificates ?
+                    . No, would like automation 
+                        -> use Cloud SQL Auth Proxy 
+                    . Yes
+                        -> Manual SSL Connection 
+                            -> Connot use SSL 
+                                ->> Authorized Networks  
+
+        *** LAB : Implementing Cloud SQL 
+            * Task1: Create a Cloud SQL database 
+                . We create wordpress-db with MySQL 8.0 and a root password 
+                . In "Connections" we select "Private IP" 
+            * Task2:  Configure a proxy in a virutal machine 
+                - In "wordpress-proxy" vm, we downladed Cloud SQL Proxy and make it exectuable 
+                    . wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy && chmod +x cloud_sql_proxy
+                . Create a db in wordpress-db SQL instance and we note the "connection name" && export SQL_CONNECTION=[SQL_CONNECTION_NAME]
+                . ./cloud_sql_proxy -instances=$SQL_CONNECTION=tcp:3306 & --> activate the proxy to the Cloud SQL DB and send process background 
+            
+            * Task 3: Connect an application to the Cloud SQL instance 
+                . We go to "wordpress-proxy" external IP and setup wordpress to use our db "wordpress", its username (root) & password and 127.0.0.1 as Database 
+                  which is the listening ip for the proxy 
+            
+            Task 4. Connect to Cloud SQL via internal IP
+                . We go to "wordpress-pivate-ip" instance external ip and setup the app to use "wordpress", its username (root) & password and the Database Host 
+                  which is the SQL_PRIVATE_IP here (Because instances are in the same VPC network here).
             
 
+    --- Spanner (Relational)
+        - GF RDBMS + scale, HA, HTAP sucha as User metadata, Ad/Fin/MarTech 
+        
+        . ACID (Atomicity, Consistency, Isolation, Durability) transactions 
+        . It combine the benefits of relational database structure with non-relational horizontal scale
+        . Scale to petabytes 
+        . Strong consistency 
+        . High availability 
+        . Used for financial and inventory application 
+
+        . Data replication is synchronazed accross zones using Google's global fiber network 
 
 
 
+    --- AlloyDB (Relational)
+        - GF Hybrid Transactional and Aanalytical Processing (HTAP) such as Machine Learning, Generative AI 
+        .  PostgreSQL is a fully managed db service 
+        . Fast transctional processing 
+        . High availability 
+        . Real-time business insights 
 
+        - It's suitable for demanding enterprise workloads, including workloads that require high transaction 
+          throughput, large data sizes, or multiple read replicas.
+
+    --- Firestore (Non-relational)
+        - GF Hierarchical, mobile, web such as User profiles, game state
+
+        . NoSQL document database 
+        . Simplifies storing, syncing and querying data 
+        . Mobile, web and IoT apps at global scale 
+        . Live synchronization an offline support 
+        . Security features 
+        . ACID (Atomicity, Consistency, Isolation, Durability) transactions 
+        . Multi-region replicaton 
+        . Powerful query engine 
+
+
+    --- Bigtable (Non-relational)
+        - GF Heavy read + write events such as adTech, financial, IoT 
+
+        . Can be used when we don't require tranactional consistency 
+        . Petabyte-scale 
+        . Consistenty sub-10ms latency 
+        . Seamless scalability for throughput 
+        . Learns and adjusts to access parterns 
+        . Ideal for Ad Tech, Fintech, and IoT 
+        . Storage engine for ML applications 
+        . Easy integration with open source big data tools 
+
+
+
+    --- BigQuery (Warehouse)
+        - GF Enterprise data warehouse such as Analytices dashboards
+
+    --- Memorystore (Redis)
+        - GF Automating complex Redis and Memcached tasks such as Enabling High availability (HA), failover, patching 
+
+        . In-memory data store service 
+        . Focus on building great apps 
+        . High availability, failover, patching, and monitoring 
+        . Sub-millisecond latency 
+        . Intances up to 300GB 
+        . Network throughput of 12 Gbps 
+        . Easy Lift-and-Shift (from open source Redis to Memorystore)
+
+
+
+=== Resource Managerment ===
+
+    --- Resource Manager:
+        . It lets us hierarchycally manage resources 
+
+        - A resource belongs to one and only one project 
+        - Project is assicated with one billing account
+        - Organization contains all billing account 
+
+        * Resource hierarchy 
+            - Images, Snapshots, Networks are "Global" Resources 
+            - External IP addresses are "Regional" Resources 
+            - Instances, Disks are "Zonal" Resources
+
+    --- Quotas:
+        * They are the maximum amount of resources we can create for a resource type as long as those resources are available.
+        
+        - How many resources we can create per project 
+            . 15 VPC network/project 
+        - How quickly you can make API requests in a project: rate limits 
+            . 5 admin actions/second (Spanner)
+
+        - How many resources we can create per region 
+            . 24 CPUs resources per region 
+
+        Why use project quotas ? 
+            . Prevent runway consumption in case of an error or malicious attack 
+            . Prevent billing spikes or surprises 
+            . Forces sizing consideration and periodic review 
         
 
+    --- Labels:
+        They are utiliy for organizing Google Cloud resources 
+        * Attached to resource: VM, disk, snapshot, image 
+        * Use labels for ...
+            - Team or Conster Center 
+                . team: marketing 
+                . team: research 
+            - Environment or stage 
+                . environment: prod 
+                . environment: test 
+    
+    --- Billing:
+        * Budgets and email alers 
+            - setting a budget lets us track how spend are growing toware that amount 
+            - Programmatic budgets: Pub/Sub -> Cloud Run functions 
+            - Labels can help us optimize Google Cloud spend 
+                For example, you could label VM instances that are spread across different regions. Maybe these instances are sending 
+                most of their traffic to a different continent, which could incur higher costs. In that case, you might consider 
+                relocating some of those instances or using a caching service like Cloud CDN to cache content closer to your users, 
+                which reduces your networking spend
+                
+                It's recommended to label all our resources and export our billing data to BigQuery to analyze our spend.
+
+                SELECT 
+                    TO_JSON_STRING(labeles) as labels, 
+                    sum(cost) as cost 
+                FROM `project.dataset.table` 
+                GROUP BY labels.
+
+            - Visualize Google Cloud sepnd with Looker Studio 
+                . It trun our data into informative dashboards and reports that are easy to read, easy to share, and fully customizable
+            
+
+    *** LAB: Examining Billing data with BigQuery 
+        In this lab, we imported billing data into BigQuery that had been generated as a avro file. We ran a simple query on the file.
+        Then we accessed a shared dataset containing more than 22,000 records of billing information.We ran a variety of queries on 
+        that data to explore how we can use BigQuery to ask and answer questions by running queries.
 
 
+    --- Resources Monitoring:
+        * Google Cloud Observability overview 
+            - Integrated logging, monitoring, Error Reporting, Trace, Profiler,  diagnostics 
+            - Manages accross platforms 
+                . Google Cloud and AWS 
+                . Dynamic Discorvery of Google Cloud with smart defaults 
+                . Open-source agents and integrations 
+            - Access to powerfull data and analyctis tools 
+
+    --- Monitoring:
+        - Dynamic config and intelligend defaults 
+        - Platform, system, and application metrics 
+            . Ingest data: Metrics, events, metadata
+            . Generates insights through dasboards, charts, alerts 
+        - Uptime/health checks 
+        - Dashboards 
+        - Alerts 
+
+        * A metrics scope is the root entity that holds monitoring and configuration information
+            . It can monitor all our Google Cloud projects in a single space 
+        
+        - Cloud monitoring allow us to create custom dashboards that contains charts of the metrics that we want to monitor. 
+        - Alerting policies can notify us of certain conditions 
+            . For example we can create an alerting policy when the network egress of our VM instance goes above a certain 
+              threshold for a specific timeframe.
+
+        * Uptime checks test the availability of our public services:
+            . The type of uptime check can be set to HTTP, HTTPS, or TCP.
+            . The resource to be checked can be an App Engine application, a Compute Engine instance, a URL of a host,
+              or an AWS instance or load balancer.
+        
+        * Ops Agent 
+            It gathers system and applications metrics form vm instances and send them to monitoring 
+            . Process metrics 
+            . Host metrics 
+            . Metrics from third-party applications 
+
+        * Custom metrics:
+            - What metric indicator might we use to trigger scaling events?
+                . From an infrastructure perspective, we might consider using CPU load or perhaps network traffic load as values 
+                 that are somewhat correlated with the number of users.
+        
+        * Autoscale to maintaion a metric at a target value 
+            To maintain a metric at a traget value, we specify a utilization target.
+                - If the metric comes form each vm in our MIG (Managed instance Group) 
+                    --> the average metric value accross all VMs is compared with the utilization target. 
+                - If the metric applies to the whole MIG and does not come form the VMs in our MIG 
+                    ---> the metric value is compared to the utilization target 
+                - If our metric has multiple values 
+                    ---> apply filter to autoscale using an individual value from the metric 
+                
+
+    --- Logging 
+        - Platform, systems, and application logs 
+            - API to write to logs 
+            - 30-day retention 
+        - Log search/view/filter 
+        - Log-based metrics 
+        - Monitoring alerts can be set on log events 
+        - Data can be expoted to Cloud Storage, BigQuery, and Pub/Sub 
+
+        * Analyze logs in BigQuery and visualize in Looker Studio 
+
+    --- Error Reporting 
+        Aggregate and display errors for runnign cloud services 
+        . Error notifications 
+        . Error dashbord 
+        . App Engine, App Script, Compute Engine, Cloud Run, Cloud Run functions, CKE, Amazon EC2 
+        . Go, Java, .NET, .Node.js, PHP, Python, and Ruby 
+
+    --- Tracing 
+        Cloud Trace is a distributed tracing system that collects latency data from our applications and displays it in the Google Cloud console. 
+        
+        * Tracing System:
+            - Displays data in near-real-time 
+            - Latency reporting 
+            - Per-URL latency sampling 
+        * Collects latency data 
+            - App Engine 
+            - Gobal external Application Load Balancers 
+            - Applications instrumented with the Cloud Trace SDKs 
+    
+    --- Profiling 
+        - Continuously analyze the performance of CPU or memory-intensive functions executed across an application.
+        - Uses statistical techniques and extremely low-impact instrumentation 
+        - Runs across all production instances 
+        - Support for Java, Go, Node.js and Python 
 
 
-
-
-
-
-
-
-
-
+    *** QUIZ:
+        What is the foundational process at the base of Google's Site Reliability Engineering (SRE) ?
+            --> Monitoring
         
 
+    
+    --> Other notes and search tasks 
+----------------------------------------------------------------------------------------
+You will grant the user the role of Service Account User, which allows that person to use a service account on a VM
+if they have access to the VM. You could perform this activity for a specific user, group, or domain.**
+
+There are five different types of members: Google Accounts, Service Accounts, Google Groups, Google Workspace domain, 
+and Cloud Identity domains. There are no "Organization Accounts" in IAM.
+
+Search ---->  rotated the CSEK keys.
 
 
 
+Cloud SQL 
+    Note: A few points to consider:
+    . Shared-core machines are good for prototyping, and are not covered by Cloud SLA.
+    . Each vCPU is subject to a 250 MB/s network throughput cap for peak performance. Each additional core increases the 
+    network cap, up to a theoretical maximum of 2000 MB/s.
+    . For performance-sensitive workloads such as online transaction processing (OLTP), a general guideline is to ensure 
+    that your instance has enough memory to contain the entire working set and accommodate the number of active connections. 
+
+
+
+    Note: A few points to consider:
+    . SSD (solid-state drive) is the best choice for most use cases. HDD (hard-disk drive) offers lower performance, but storage 
+    costs are significantly reduced, so HDD may be preferable for storing data that is infrequently accessed and does not require very low latency.
+    . There is a direct relationship between the storage capacity and its throughput. 
+
+SLA: Service Level Agreement 
+
+
+qwiklabs-gcp-02-b34b4831991d:us-west1:wordpress-db
+10.59.96.2	
+
+Monitoring:
+    It is at the base of site reliability which incorporates aspects of software engineering and applies that to operations whose goals are to 
+    create ultra-scalable and highly reliable software systems.
+
+Reliability refers to the ability of a system to consistently perform its intended functions within defined conditions and maintain uninterrupted service.
+----------------------------------------------------------------------------------------
