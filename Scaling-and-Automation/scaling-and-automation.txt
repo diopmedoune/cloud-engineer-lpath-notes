@@ -1,0 +1,310 @@
+=== Elastic Google Cloud Infrastructure : Scaling and Automation ===
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------
+Note: In your own environment, if you run HA VPN to a remote VPN gateway on-premises for a customer, you can connect in one of the following ways:
+
+    . Two on-premises VPN gateway devices: Each of the tunnels from each interface on the Cloud VPN gateway must be connected to its own peer gateway.
+    . A single on-premises VPN gateway device with two interfaces: Each of the tunnels from each interface on the Cloud VPN gateway must be connected 
+      to its own interface on the peer gateway.
+    . A single on-premises VPN gateway device with a single interface: Both of the tunnels from each interface on the Cloud VPN gateway must be connected 
+      to the same interface on the peer gateway.
+---------------------------------------------------------------------------------------------------------------------------------------
+
+== Interconnecting Network ==
+    --- Cloud VPN 
+        * It securely connects our on-premises network to our Google Cloud VPC network 
+        - Useful for low-volume data connection 
+        - 99.9 % SLA 
+        - Supports: 
+            . Site-to-site VPN 
+            . Static routes 
+            . Dynamic routes (Cloud Router)
+            . IKEv1 and IKEv2 ciphers   
+                -> protocols used to establish secure communication channels (VPN tunnels) between our on-premises network and Google Cloud
+
+        GC offers diffent types of VPN 
+
+        * Classic VPN topology 
+            - Two VPN gateways, Two VPN tunnels 
+            - The Cloud VPN gateway is a regional resource that uses a regional external IP address.
+            - https://drive.google.com/file/d/1mwxo-_KnulBHzVxc9FB_6RdaDe4tGnwz/view?usp=drive_link
+            - Image link: https://drive.google.com/file/d/1mwxo-_KnulBHzVxc9FB_6RdaDe4tGnwz/view?usp=drive_link
+            - When using Cloud VPN, the max. MTU is 1460 bytes 
+
+        * HA VPN ---------------- Back ----------------
+            It is a high availability Cloud VPN solution that lets us securely connect our on-premises network to our VPC network through an 
+            IPsec VPN connection in a single region.
+
+            - Provides 99.99 service availability 
+            - Google Cloud automatically chooses two external IP addresses 
+                . Supports multiple tunnels 
+                . VPN tunnels connected to HA VPN gateways must use dynamic (BGP) routing
+            - Supports site-to-site VPN for different topologies/configuration scenarios:
+                . An HA VPN gateway to peer VPN devices 
+                . An HA VPN gateway to an AWS virutal private gateway 
+                . Two HA VPN gateways connected to each other 
+            
+            * HA VPN to peer VPN gateway topology 
+                --> image link : https://drive.google.com/file/d/1ORaEBrkbAu1tjBPInP76VdJTrT6ah2BV/view?usp=drive_link
+
+            * HA VPN to AWS peer  gateway topology 
+                --> image link : https://drive.google.com/file/d/1qAaB77g4_EsVBzopH96MsD20pnLfJb7z/view?usp=drive_link
+
+            * HA VPN between Google Cloud networks topology 
+                ON each HA VPN gateway, we create two tunnels 
+                We connect interface 0 on one HA VPN gateway to interface 0 on the other HA VPN, and the same for interface1 
+                --> image link : https://drive.google.com/file/d/19O192jFuuM-h1BIuMJwO1KTIC6Zju1f8/view?usp=drive_link
+
+            * Dynamic routing with Cloud Router
+                - To automatically propagate network configuration changes, the VPN tunnel uses Cloud Router to establish a BGP session between the VPC 
+                  and the on-premises VPN gateway, which must support BGP.
+                - To set up BGP, an additional IP address has to be assigned to each end of the VPN tunnel.
+                --> image link: https://drive.google.com/file/d/1ZoVRwbYz7k9YvEsTQdVs5QCLP19uRwn_/view?usp=drive_link
+            
+                
+        *** LAB: Configuring Google Clodu HA VPN 
+            .........................................................................
+
+        
+
+    --- Cloud Interconnect and Peering 
+        . Dedicated connections provide a direct connection to Google’s network, but shared connections provide a connection to Google’s network through a partner.
+        . Layer 2 connections use a VLAN that pipes directly into your GCP environment, providing connectivity to internal IP addresses in the RFC 1918 address space.
+        . Layer 3 connections provide access to Google Workspace services, YouTube, and Google Cloud APIs using public IP addresse
+
+        - Didicated Interconnect (Layer 2, Didicated)
+            . It provide direct physical connection between our on-premises network and Google's network. This enables us to tranfer large amounts of data 
+              between networks, which can be more cost-effective than purchasing additional bandwidth over public internet.
+            . Requires a connection in a Google Cloud colocation facility
+            . Google have a list of locations where we can create dicated connections 
+
+       - Partner Interconnect (Layer 2, Layer 3, Shared)
+            . It provides connectivity between our on-premises network and our VPC network through a supported service provider.
+
+        - Cross-Cloud Interconnect 
+            . Establish high.bandwidth dedicated connectivity between Google Cloud and another cloud service provider 
+            . Supports the adoption of an integrated multi cloud strategy 
+            . Two connetion sizes: 10 Gbps or 100 Gbps 
+
+        - Direct Peering (Layer 3, Didicated)
+            . It proivides a direct connection between our busness network and Google's 
+            . Broad-reaching edge network locations
+            . Exchange BGP routes 
+            . Reach all of Google's services 
+            . No SLA 
+            . Peering requirements 
+
+            ! GCP's Edge Points of Presence, or PoPs, are where Google's network connects to the rest of the Internet via peering.
+
+        - Carrier Peering (Layer 3, Shared)
+            . It provides connectivity trough a supported partener (if we cannot satisy Google's peering requirements)
+            . Carrier Peering partner 
+            . Reach all of Google's services 
+            . Partner requirements 
+            . No SLA 
+
+      
+
+        * Comparaison of Interconnect Options:
+            ---> Image link: https://drive.google.com/file/d/1b7dfJfgBIRNBqab_iODAujCOW5cdXwm5/view?usp=drive_link
+        
+        * Comparaison of Interconnect Options:
+            ---> Image link: https://drive.google.com/file/d/15PJZLqb12melnk-bAR-Qs_RJh1x9ViCK/view?usp=drive_link
+        
+
+    --- Choosing a connetion
+        * Interconnect services provide direct access to RFC1918 IP addresses in our VPC, with an SLA.
+        * Peering services, in contrast, offer access to Google public IP addresses only, without an SLA.
+
+        * Connect on-premises to Google Workspace
+            ---> Image link: 
+
+        * Connect Google Clodu with another Cloud service 
+            ---> Image link: 
+
+        * Connect on-premises with Googl Cloud 
+            ---> Image-link: 
+
+    --- Shared VPC and VPC Peering 
+        * Shared VPC:
+            - It allows an organization to connect resources from multiple projects to a common VPC network so that they can communicate 
+             with each other securely and efficiently by using internal IP addresses from that network.
+
+            - A standalone VPC network is an unshared VPC network that exists in either a standalone project or a service project.
+
+        * VPC Peering: 
+            - It allows private RFC 1918 connectivity across two VPC networks, regardless of whether they belong to the same project or
+              or the same organizations.
+            
+        
+        * Shared VPC versus (vs.) VPC Peering:
+            --> image link: 
+
+== Load Balancing and Autoscaling ==
+    --- Global and regional load balancers 
+        * Global 
+            . Global External HTTP(S) Load Balancing 
+            . External HTTP(S) Load Balancing (classic)
+            . External SSL Proxy Load Balancing 
+            . External TCP Proxy Load Balancing 
+
+        * Regional 
+            . Regional External HTTP(S) Load Balancing 
+            . Internal HTTP(S) Load Balancing 
+            . Internal TCP Proxy Load Balancing 
+            . Internal TCP/UDP Load Balancing 
+            . External TCP/UDP Network Load Balancing 
+            . External Regional TCP Proxy Load Balancing 
+
+    --- Managed intance groups 
+        It's a collection of identical VM intances thay we control as a single entity using an instance template 
+        - Deploy indentical instances based on instance template 
+        - Instance group can be resized 
+        - Manager ensures all instannces are RUNNING
+        - Typically used with auto scaler 
+        - Can be single zone or regional
+
+    --- Autoscaling and Health checks 
+        * Managed instances groups offer autoscaling capabilities
+            - Dynamically add/remove instances:
+                . Increases in load 
+                . Decreases in load 
+            - Autoscaling policy:
+                . CPU utilization 
+                . Load balancing capacity 
+                . Monitoring metrics 
+                . Queue-based workload 
+                . Schedule-based 
+        
+            - Health checking mechanisms determine wether VM instances respond properly to traffic.
+
+        * Configuring stateful IP addresses 
+            Perserve the unique  state of each MIG VM instance on machine restart, recreation, auto-healing, or update event.
+                . IP address to remain static after it has been assigned 
+                . Configuration depends on specific IP addresses 
+                . Server is accessed through a dedicated static IP address 
+                . Migrate workloads without changing network configuration 
+            
+    --- HTTP(S) load balancing 
+        It provides global load balancing for HTTP(S) requests destined to our instances. 
+        . Global load balancing 
+        . Anycast IP address 
+        . HTTP or port 80 or 8080 
+        . HTTPs on por 443 
+        . Support IPv4 and IPv6 
+        . Autoscaling 
+        . URL maps 
+
+        Request are generallly routed to the instance group that is closest to the user. 
+
+        * Backend services 
+            . Health check (instnces that pass are allowed to receive requests)
+            . Session affinity (optional)
+            . Time out setting (30-sec default) --> ... before considering the request a failure.
+            . On ore more backends 
+                . An instance group (managed or unmanaged)
+                . A balancing mode (CPU utilization or RPS(Request Per Seocon)) --> ells the load balancing system how to determine when the back-end is at full usage
+                . A capacity scaler (celling percentage or CPU/Rage targets)
+        
+    --- Example of HTTP load balancer 
+        * Content-based load balancing 
+        /(defaul handler) --> instance group 1 
+        /video ---> Instance group 2
+
+    --- HTTP(S) load balancing 
+        - Target HTTP(S) load balancing 
+        - One singed SSL certificate installed (minimum)
+        - Client SSL session terminates at the load balancer 
+        - Support the QUIC transport layer protocol 
+        
+        ! QUIC is a transport layer protocol that allows for faster client connection initiation, eliminates head-of-line blocking in multiplexed streams, and supports 
+          connection migration when a client's IP address changes.
+
+        * SSL certificate 
+            - Required for HTTP(S) load balancing 
+            - Up to 15 SSL certificates (per target proxy)
+            - Create an SSL certificate resource 
+
+        * Backend buckets ---------------------------- BACK ----------------------------
+            - They allow to use Google Cloud Storage buckets with HTTP(S) load balancing 
+
+        * Network endpoint groups (NEG)
+            - It is a configuration object that speicifies a group of backend endpoint services 
+            - We can use NEGs as backends for some load balancers and with Traffic Director 
+            - A zonal NEG contains one or more endpoints that can be Compute Engine VMs or services running on the VMs.
+            - An Internet NEG contains a single endpoint that is hosted outside of Google Cloud.
+
+    *** LAB: Configure an Application Load Balancer with Autoscaling 
+
+
+    --- Cloud CDN 
+        - Content Delevery Network uses Google's globallly distributed edge points of presence to cache HTTP(S) load-balanced content close to users.
+        - Each Cloud CDN request is automatically logged within Google Cloud. These logs will indicate a “Cache Hit” or “Cache Miss” status for each 
+          HTTP request of the load balancer.
+
+        * Cloud CDN cache modes 
+            - Cache modes control the factors that determine whether or not Cloud CDN caches content 
+            - Cloud CDN offers three cache modes 
+                . USE_ORIGIN_HEADERS --> requires origin responses to set valid cache directives and valid caching headers
+                . CACHE_ALL_STATIC --> automatically caches static content that doesn't have the no-store, private, or no-cache directive.
+                . FORCE_CACHE_ALL --> unconditionally caches responses, overriding any cache directives set by the origin.
+
+    --- SSL Proxy Load Balancing 
+        - Global load balancing for encrypted, non-HTTP traffic 
+        - Terminates SSL session at load balancing layer then balances the connections across our instances using the SSL or TCP protocols 
+        - Support IPv4 or IPv6 clients 
+        - Beneifits:
+            . Intelligent routing 
+            . Certificate management 
+            . Security patching 
+            . SSL policies 
+
+    --- TCP proxy load balancing 
+        - Global load balancing service for unencrytped, non-HTTP traffic 
+        - Terminates TCP sessions at load balancing layer 
+        - IPv4 or IPv6 clients 
+        - Beneifits:
+            . Intelligend routing 
+            - Security patching 
+        
+    ---- Network load balancing 
+        - Regional, non-proxied load balancer (traffic is passed through the load balancer instead of being proxied)
+        - Forwarding rules (IP protocal data)
+        - Trafic: 
+            . UDP 
+            . TCP/SSL ports 
+
+        * Architecture:
+            - Backend service-based architecture
+                . Regional backend service 
+                . Defines the behavior of the load balancer and how it distributes traffic to its backend instance groups 
+                . Enables new features not supported with legacy target pools 
+                    . Non-legacy health checks 
+                    . Auto-scaling wiht managed instance groups 
+                    . Connection draining 
+                    . Configurable failover policy 
+                
+            - Target pool-based architecture
+                *  A target pool resource defines a group of instances that receive incoming traffic from forwarding rules.
+                   When a forwarding rule directs traffic to a target pool, the load balancer picks an instance from these target 
+                   pools based on a hash of the source IP and port and the destination IP and port. These target pools can only be 
+                   used with forwarding rules that can handle TCP and UDP traffic.
+
+                - Up to 50 per project 
+                . One health check 
+                . Instances must be in the same region 
+
+    
+    --- Internal Load Balancing: 
+        
+
+
+
+
+
+
+
+
+
