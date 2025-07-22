@@ -237,6 +237,16 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
             - An Internet NEG contains a single endpoint that is hosted outside of Google Cloud.
 
     *** LAB: Configure an Application Load Balancer with Autoscaling 
+        - Application Load Balancing (HTTP/HTTPS) is implemented at the edge of Google's network in Google's points of presence (POP) around 
+          the world. User traffic directed to an Application Load Balancer (HTTP/HTTPS) enters the POP closest to the user and is then 
+          load-balanced over Google's global network to the closest backend that has sufficient available capacity.
+        
+        .............................................................
+
+
+
+
+
 
 
     --- Cloud CDN 
@@ -298,13 +308,125 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
 
     
     --- Internal Load Balancing: 
+        .............................................................
+
+
+    *** LAB: Configure an Internal Load Balancing 
+        - An internal Network Load Balancer is a regional service. 
+        Crete two instances template if we want, this two templates have the same parameters unless the zone
+        .............................................................
+
+
+    --- Choosing a load balancer:
+        Only the HTTP(S), SSL proxy, and TCP proxy load balancing services support IPv6 clients.
+        - Application Load Balancer --> when we need a flexible feature set for our applications with HTTP(S) traffic
+        - Network Load Balancer --> to implement TLS offload, TCP proxy, or support for external load balancing to backends in multiple regions
+            we'd choose a passthrough Network Load Balancer to preserve client source IP addresses, avoid the overhead of proxies, and to support
+            additional protocols like UDP, ESP, and ICMP.
+
+        ---> Image link: https://drive.google.com/file/d/1JUEn1oaMaqxykQmBALkhpkCly-AUovm4/view?usp=drive_link
+
+        * Sumary of Google Cloud Load balancers 
+            ---> Image link: https://drive.google.com/file/d/15Wso6tpm3nVoqP1OAWmHRtMDxTo-h0YN/view?usp=drive_link
+
+
+== Infrastructure Automation == 
+
+    --- Terraform:
+        Terraform uses a system of highly structured templates and configuration files to document the infrastructure in an easily readable and understandable format.
+        It can create incremental execution plans, which allows you to build your overall configuration step by step.
+
+        . Repeatable deployment process 
+        . Declarative language 
+        . Focus on the application
+        . Parallel deployment 
+        . Template-driven 
+
+        * Infrastructure as code (IaC)
+            - It allows quick provisioning and removing of infrastructures 
+                . Build and infrastructure when needed 
+                . Destroy the infrastructure when no in use 
+                . Create identical infrastructure for dev, test, and prod 
+                . Can be par of a CI/CD pipeline 
+                . Templates are the building blocks for disaster recovery procedures 
+                . Manage resource dependencies and complexity 
+                . Google Cloud supports many IaC tools 
+
+        * Terraform language 
+            . Terraform language is the interface to declare resources 
+            . Resources are infrastructure objects 
+            . The configuration file guides the managed of the resource
+
+        * Deploying Infrastructure with Terraform 
+            - terraform init --> It makes sure that the Google provider plugin is downloaded and installed in a subdirectory of the current working directory
+
+                               It performs a refresh, unless explicitly disabled, and then determines what actions are necessary to achieve the desired state 
+            - terraform plan --> specified in the configuration files. This command is a convenient way to check whether the execution plan for a set of changes ù
+                               matches your expectations without making any changes to real resources or to the state
+
+            - terraform apply --> creates the infrastructure defined in the main.tf file.
+    
+    *** LAB: Automating the Deployment of Infrastructure Using Terraform 
+        .............................................................
         
+    --- Google Cloud Marketplace 
+        It let's us quickly deploy functional software packages that run on Google Cloud.
+        - Deploy production-grade solutions 
+        - Single bill for Google Cloud and third-party services 
+        - Manage solutions using Terraform 
+        - Notificactions when security update is available!
+        - Direct access to partner support 
+
+
+    --- QUIZ 
+        . What’s the benefit of writing templates for your Terraform configuration?
+        --> Allows you to abstract part of your configuration into individual  building blocks that you can reuse
+        
+        . What does Google Cloud Marketplace offer?
+        ---> Production-grade solutions from third-party vendors who have already created their own deployment configurations based on Terraform
+
+== Managed Services ==
+    They are partial or complete solutions offered as a service 
+
+    --- BigQuery
+        It's a serverless highly scalable and cost-effective cloud data warehouse 
+        - Fully managed
+        - Petable scale 
+        - SQL interface 
+        - Very fast
+        - Access methods:
+            . Cloud console
+            . Command line tool 
+            . BigQuery rest API 
+    
+    --- Dataflow 
+        It allow to execute a wide variety of data processing patterns 
+        - Serverless, fully managed data processing 
+        - Batch and stream processng with autoscale 
+        - Open source programming using bearn 
+        - Intelligently scale to millions of QPS 
+    
+    --- Dataprep 
+        It allow to visually explore, clean and prepare data for analysis and machine learning 
+        - Serverless, workds at any scale
+        - Suggests ideal data transformation (Don't have to write code)
+        - Focus on data analysis 
+        - Integrated partner service operated by Trifacta 
+    
+    --- Dataproc 
+        It is a fast, easy to use, fully managed cloud service for running Apache Spark and Apache Hadoop cluster in a simple way 
+        - Low cost (per-second, preemptible)
+        - Super fast to star, scale, and shut down 
+        - Integrated with other google cloud services 
+        - Managed Service 
+        - Simple and familiar 
+
+    --- Quiz 
+        How are Managed Services useful?
+        ---> Managed Services may be an alternative to creating and managing infrastructure solutions.
 
 
 
-
-
-
-
-
-
+--------------------------------------------------------------------------------------------------------------------------------------
+Serverless means that servers or Compute Engine instances are obfuscated so that you don't have to worry about the infrastructure.
+--------------------------------------------------------------------------------------------------------------------------------------
