@@ -1,0 +1,206 @@
+=== Getting Started with Google Kubernetes Engine ===
+
+----------------------------------------------------------------------------------------------------------------------------------------
+* Affinity is used to attract Pods to certain nodes, based on the node's attributes (node affinity) or based on the labels of other Pods 
+  running on those nodes (inter-pod affinity). This can ensure that Pods are placed on nodes that meet specific criteria, such as proximity 
+  to necessary resources or other Pods they need to communicate with.
+
+* Anti-affinity, on the other hand, is used to repel Pods from certain nodes. This is useful for spreading Pods across nodes to ensure high 
+  availability and resilience, preventing single points of failure.
+
+* Each node runs a small family of control-plane components called a kubelet. You can think of a kubelet as Kubernetes’s agent on each node.
+  When the kube-APIserver wants to start a Pod on a node, it connects to that node’s kubelet. Kubelet uses the container runtime to start 
+  the Pod and monitors its lifecycle, including readiness and liveness probes, and reports back to the kube-APIserver
+
+* Kubernetes offers several container runtime (software used to run a container form a container image) choices, but the Linux distribution 
+  that GKE uses for its nodes launches containers that use containerd, the runtime component of Docker.
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+== Introduction to Google Cloud ==
+    - Kubernetes is an orchestration framework for software containers. Containers are a way to package and run code that's more efficient 
+     than virtual machines. Kubernetes provides the tools we need to run containerized applications in production and at scale
+
+    - Google Kubernetes Engine (GKE) is a managed service for Kubernetes.
+    
+    *** LAB : Accessing the Google Cloud Console and Cloud Shell 
+        ----------- W'll come back to take notes -----------
+
+== Introduction to containers and Kubernetes ==
+    
+
+    
+== Kubernetes Architecture ==
+    --- Kubernetes concepts 
+        * Kubernetes object model 
+            - Each item in Kubernetes manages is repersented by an object and we can view and change these objects attibutes and state 
+            - It's defined as persistent entity that repersents the state of something running in a cluster: its disered and current state 
+            - Kubernetes objects have two important elements:
+                . Object spec: the disired state 
+                . Object status: the current state (provided by K8s control plane)
+
+        * Declarative management 
+            - Kubernetes needs to be told how objects should be managed and it will work to achieve and maintain this disired state
+        
+        - Kubernetes control plane is a term to refer to the various system processes that collaborate to make a Kubernetes cluster work.
+        - Pods are the foundational building block of the standard Kubernetes model, and they’re the smallest deployable Kubernetes object.
+          A Pod creates the environment where the containers live, and that environment can accommodate one or more containers
+        
+        - Kubernetes assigns each Pod a unique IP address  and every container within a Pod shares  the network namespace, including IP  
+          address and network ports. Containers within same Pod can communicate through localhost (127.0.0.1)
+        
+        - A Pod can also specify a set of storage volumes that will be shared among its containers.
+
+    --- Kubernetes components 
+        - A cluster need computers: One computer is called "control plane" others are called "nodes". The node’s job is to run Pods, and 
+          the control plane’s is to coordinate the entire cluster.
+
+        * kube-APIserver (the only single component that w'll interact with)
+            - Accept comands that view or change the state of the cluster 
+            - Lauch Pods
+
+        * Kubectl 
+            - Connect to the kube-apiserver
+            - Communicate with it using the kubernetes API 
+            - Authenticates incoming requests 
+            - Manages admission control 
+        
+        * etcd 
+            - The cluster database 
+            - The jo of etcd: 
+                Reliably store the state of the cluster 
+                    . All the cluster configuration data 
+                    . What nodes are part of the cluster 
+                    . What Pods shoud be running 
+                    . Where they should be running 
+        
+        * kube-scheduler 
+            - Shedule Pods onto the nodes 
+            - Evaluates the requirements of each individual Pod and selects wich node is most suitable 
+            ! Doesn't do the work of actually lauching pods on nodes. It chooses a node an writes the name of that node into the Pod object.
+
+            - How does kube-scheduler decide where to run a Pod?
+                . It knows the state of all the nodes 
+                . It obeys constraints we define 
+                . We can define affinity parameters 
+                . We can also define  anti-affinity parameters 
+
+        * kube-controller-manager 
+            - Many kubernetes objects are maintained by loops of code called controllers 
+            - We can use certain kubernetes conrollers to manage workloads 
+
+        * kube-cloud-manager 
+            - Manages controllers that interact with underlying cloud providers 
+
+
+        - How is GKE different Kubernetes ?
+            . GKE manages all the control plane components for us. It still exposes an IP address to which we send all of our Kubernetes API 
+              requests, but GKE is responsible for provisioning and managing all the control plane infrastructure behind it.
+
+    --- GKE Autopilot and GKE standard 
+        * Autopilot 
+            - Optimizes the management of Kubernetes with a hands-off experience 
+            - Less management overhead 
+            - Less configurations options 
+            - Only pay for what we use 
+
+            - Optimized for production:
+                . Create clusters according to best practices 
+                . Difines machine type based on workload 
+                . Deploy production-ready GKE clusters faster
+            
+            - Strong security posture 
+                . Secures cluster nodes and infrastructure 
+                . Eliminates infrastructure security tasks 
+                . Reduces the cluster's attack surface (by locking down nodes)
+                . Reduces ongoing configuration mistakes   (by locking down nodes)
+                
+            - Promotes operational efficiency 
+                . Google monitors the entire Autopilot cluster 
+                . Ensures Pods are always scheduled 
+                . Keep clusters up to data 
+                . Configure updata windows for cluters 
+                . Users only pay for Pods, not nodes 
+            
+            !!! Some inconvenients:
+                - Configuration options are more restrictive 
+                - Autopilot clusters have restrictions on access to node objects 
+                - No SSH 
+                - No privilege escalation 
+                - Limitations on node affinity and host access 
+
+        * Standard 
+            - Kubernetes management infrastructure to be configured in many different ways 
+            - More management overhead 
+            - Fine-grained control (allows for precise management of who can access specific resources and what actions they can perform)
+            - Pay for all of the provisioned infrastructure, regardless of how much gets used 
+
+            - Lets us do:
+                . Cluster configuration
+                . Cluster management 
+                . Cluster optimization 
+    
+    --- Object Manangement:
+        ...
+
+        *** Lab: Deploying GKE Autopilot Cluster 
+            ....................................................................................
+
+    
+== Kubernetes operations ==
+    --- The kubectl command 
+        - To work correctly kubectl must be configured with the location and credentials of a Kubernetes cluster.
+        - Stores it's configuration file in the home directore in "$HOME/.kube/config."
+        - Configruation file contain the list of clusters, the credentials that will be attached to each 
+        - "config view" command allows to view configurations (show kubectl command config)
+
+        $ gcloud container cluster get-credentials [CLUSTER_NAME] --region [REGION_NAME] -> to be able to connect kubectl to a GKE cluster 
+
+        ! Can't create new clusters 
+        ! Can't change the shape of existing clusters 
+
+    --- Introspection:
+      - It’s the act of gathering information about the containers, pods, services, and other engines that run within the cluster.
+      - kubectl commands: get, describe, exec, logs 
+            $ kubectl get pods -> show the Pod's status as:
+                . Pending: indicates that Kubernetes has accepted a Pod but it's still being scheduled 
+                . Running 
+                . Successded: means that all containers finished running successfully, or instead, that they terminated successfully and they won’t be restarting.
+                . Failled: means a container terminated with a failure, and it won’t be restarting.
+                . Unknown: where the state of the Pod simply cannot be retrieved, probably because of a communication error between the control plane and a kubelet.
+                . CrashLoopBackOff: means that one of the containers in the Pod exited unexpectedly even after it was restarted at least once.
+                    ---> Usually it mean that a pod is configured incorrectly
+            
+            $ kubectl describe pod [POD_NAME] --> provides information about a Pod and its containers 
+                Returned infos:
+                    Pod: Name, Namespace, Node name, Labels, Status, IP address 
+                    Container: State(wating, running, terminated), Images, Ports, Commands, Restart counts 
+                
+            $ kubectl exec [POD_NAME] -- [command] : Run a single command inside a container and view results in our own command shell 
+                --> some cmds: env, ps aux, cat /proc/1/mounts, ls /
+            
+
+            $ kubectl logs [POD_NAME] --> a way to see what is happening inside a Pod 
+                Pod logs includ:
+                    . stdout: Standard output on the console 
+                    . stderr: Error messages 
+                
+                If the Pod has multiple containers, we can use -c to show logs in a specific container 
+            
+            * Running a command within a Pod 
+                $ kubectl -it [POD_NAME] -- [command]  (interactive mode)
+                Let's take an example 
+                    $ kubectl exec -it demo -- /bin/bash 
+                    root@demo:# ls 
+                    bin boot dev ....
+
+                    - The -i argument tells kubectl to pass the terminal’s standard input to the container, and the -t argument tells kubectl that the input is a TTY.
+
+            !!! It's not a best practice to install software directly   into a container.
+            !!! Changes made by containers to their file systems are usually ephemeral.
+            --> Consider building container images that have exactly the software you need 
+            --> The interactive shell will allow us to figure out what needs to be changed 
+            --> Integrate those changes into our container images and redeploy them 
+
+
