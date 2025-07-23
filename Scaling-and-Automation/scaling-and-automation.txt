@@ -1,7 +1,5 @@
 === Elastic Google Cloud Infrastructure : Scaling and Automation ===
 
-
-
 ---------------------------------------------------------------------------------------------------------------------------------------
 Note: In your own environment, if you run HA VPN to a remote VPN gateway on-premises for a customer, you can connect in one of the following ways:
 
@@ -65,9 +63,10 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
             
                 
         *** LAB: Configuring Google Clodu HA VPN 
-            .........................................................................
+            ---> Technical notes in HA-VPN-Lab.txt
 
-        
+            In this lab we configured HA VPN gateways. We also configured dynamic routing with VPN tunnels and configured global dynamic routing mode. 
+            Finally we verified that HA VPN is configured and functioning correctly.
 
     --- Cloud Interconnect and Peering 
         . Dedicated connections provide a direct connection to Google’s network, but shared connections provide a connection to Google’s network through a partner.
@@ -140,7 +139,7 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
             
         
         * Shared VPC versus (vs.) VPC Peering:
-            --> image link: 
+            --> image link: https://drive.google.com/file/d/1Oj6PjA9wlJj-as0MDKjGyYhUxL0DmuK_/view?usp=drive_link
 
 == Load Balancing and Autoscaling ==
     --- Global and regional load balancers 
@@ -240,14 +239,11 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
         - Application Load Balancing (HTTP/HTTPS) is implemented at the edge of Google's network in Google's points of presence (POP) around 
           the world. User traffic directed to an Application Load Balancer (HTTP/HTTPS) enters the POP closest to the user and is then 
           load-balanced over Google's global network to the closest backend that has sufficient available capacity.
+
+        * Review: In this lab, you configured an Application Load Balancer (HTTP) with backends in Region1 and Region2. Then you stress-tested the 
+        Application Load Balancer with a VM to demonstrate global load balancing and autoscaling
         
-        .............................................................
-
-
-
-
-
-
+        --> link: https://www.cloudskillsboost.google/paths/11/course_templates/178/labs/470301
 
     --- Cloud CDN 
         - Content Delevery Network uses Google's globallly distributed edge points of presence to cache HTTP(S) load-balanced content close to users.
@@ -276,7 +272,7 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
         - Terminates TCP sessions at load balancing layer 
         - IPv4 or IPv6 clients 
         - Beneifits:
-            . Intelligend routing 
+            . Intelligent routing 
             - Security patching 
         
     ---- Network load balancing 
@@ -307,15 +303,32 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
                 . Instances must be in the same region 
 
     
-    --- Internal Load Balancing: 
-        .............................................................
+    --- Internal Load Balancing:
+        * Internal TCP/UDP load balancing  
+            - The internal TCP/UDP load balancer is a regional private load balancing service for TCP and UDP-based traffic
+            - Regional, private load balancing 
+                . VM instances in same region 
+                . RFC 1918 IP addresses 
+            - TCP/UDP traffic 
+            - Reduced latency, simpler configuration 
+            - Software-defined, fully distributed load 
+            - Based on open source Envoy proxy  
 
+        * Internal HTTP(S) load balnacing 
+            - Regional, private load balancing 
+                . VM instances in same region 
+                . RFC 1918 IP addresses 
+            - HTTP, HTTPS, or HTTP/2 protocols
+            - Based on open source Envoy proxy 
+
+            - Software-defined load balancing 
+                ---> link: https://drive.google.com/file/d/14AiUFo457z2wyaLsOPnrCiYmvKCVjQLQ/view?usp=drive_link
 
     *** LAB: Configure an Internal Load Balancing 
         - An internal Network Load Balancer is a regional service. 
         Crete two instances template if we want, this two templates have the same parameters unless the zone
-        .............................................................
 
+        ---> link: https://www.cloudskillsboost.google/paths/11/course_templates/178/labs/470309
 
     --- Choosing a load balancer:
         Only the HTTP(S), SSL proxy, and TCP proxy load balancing services support IPv6 clients.
@@ -367,7 +380,7 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
             - terraform apply --> creates the infrastructure defined in the main.tf file.
     
     *** LAB: Automating the Deployment of Infrastructure Using Terraform 
-        .............................................................
+        View "tfinfra" folder 
         
     --- Google Cloud Marketplace 
         It let's us quickly deploy functional software packages that run on Google Cloud.
@@ -426,7 +439,9 @@ Note: In your own environment, if you run HA VPN to a remote VPN gateway on-prem
         ---> Managed Services may be an alternative to creating and managing infrastructure solutions.
 
 
-
+        
+    ---> Others notes
 --------------------------------------------------------------------------------------------------------------------------------------
-Serverless means that servers or Compute Engine instances are obfuscated so that you don't have to worry about the infrastructure.
+Serverless means that servers or Compute Engine instances are obfuscated so that we don't have to worry about the infrastructure.
+IKEv1 and IKEv2 are both protocols used in IPsec VPNs to establish secure connections.
 --------------------------------------------------------------------------------------------------------------------------------------
