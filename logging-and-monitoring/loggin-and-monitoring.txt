@@ -1,0 +1,136 @@
+=== Loggging and Monitoring in Google Cloud ===
+
+== Introduction to Google Cloud Observability ==
+
+    --- Need for Google Clodu Observability 
+        . Visibility into system heath 
+        . Efficient troubleshooting
+        . Performance improvement
+        . Error Reporting  and alerting
+
+
+        - Cloud Monitoring 
+            * Collecting, processing, aggregating and displaying real-time quantitative data about a system such as:
+                . Query counts and types 
+                . Error counts and types 
+                . Processing times 
+                . Server lifetimes 
+
+        * What's needed from products ?
+            - Continual improvement 
+            - Dashborads 
+            - Automated alerts 
+            - Incident response 
+        
+        * The importance of latency
+            - Changes in latency could indicate emgerging issues
+            - Its values may be tied to capacity demands 
+            - It can be used to measure system improvements 
+            _ How is it measured ?
+                . Page load latency 
+                . Nuber of requests waiting for a thread 
+            
+        * The importance of traffic
+            - It's an indicator of current system demand 
+            - Its historical trends are used for capacity planning
+            - It's a core measure when calculating infrastructure spend
+            _ Sample traffic metrics:
+                . retrievals per second (http requests)
+                . active requests (number of concurrent sessions)
+                
+        * The importance of saturation 
+            - It's an indicator of how full the service is 
+            - It focus onthe most constrained resources 
+            - It's frequently tied to degrading performance as capacity is reached 
+            _ Sample capacity metrices include:
+                . % memory utilization 
+                . % thread pool utilization 
+
+        * The importance of errors
+            - They mays indicate configuration or capacity issues 
+            - They can indicate service level objective violations 
+            - An error might mean it's time to send out and alert 
+                _ Sample errors metrics include:
+                    . failed requests 
+                    . exceptions 
+
+    * Caputure signals (Metrics, Logs, Trace) -> Visualize and Analyze (Dashborads, ...) <--Manage Incident (Alerts, E. Reporting, SL0)
+                                                               |
+                                                        Troubleshooting
+        
+    --- Cloud Monitoring: 
+        - Provides visibility into the performance, uptime, and overall health of cloud-powered applications.
+        - It collects metrics, events, and metadata from projects, logs, services, systems, agents, custom code, and various common application 
+          components, including Cassandra, Nginx, Apache Web Server, Elasticsearch, and many others.
+        - Ingests that data and generates insights via dashbords, Metrics, Explorer charts,and automated alerts. 
+        - Many free metrics 
+            . Over 100+ monitored resources services over 1500+ metrics are immadiately available with no cost 
+        - Customizaion for key workloads
+            . Leverage Managed Service for Prometheus on GKE and Cloud Ops Agent on Compute Engine for custom visualization 
+        - In-context visualization & alerts 
+            . View relevant telemetry data alongside your workload across Google Cloud 
+        
+
+    --- Cloud Logging 
+        - Allows users to collect, search, analyze, monitor, and alert on log entries ane events 
+        - Provide automatic ingestion with simple controls for routing, storing, and displaying our log data
+        * Logging has multiple aspects:
+            - Collect:  
+                . Cloud events, configuration changes, and from customer services 
+                . Logs at various level of the resource hierarchy 
+            - Analyze 
+                . Log data in real time with integrated Logs Explorer 
+                . Run queries and analyze with Log Analytics 
+                . Exported logs from Cloud Storage or BigQuery 
+            - Export 
+                . Export to cloud Storage, or Pub/Sub or BigQuery 
+                . Logs-based metrics for augmented Monitoring 
+            - Retain 
+                . Data access and service logs for 30 days and admin logs for 400 days 
+                . Longer-term in cloud Storage or BigQuery 
+
+        * Developer use cases 
+            - Integration into popular SDKs
+                . Get started quickly with a large collection of system metrics and logs 
+            - Real time log analysis 
+                . Analyze log data in real time, debug code, troubleshoot your apps 
+            - Quick error detection 
+                . Find errors via stack traces automatically with Error Reporting 
+            
+        * Security operations uses cases 
+            - Collect audit logs
+                . Collect Google Cloud logs by default, advanced security  logs such as data access logs 
+            - Collect network telemetry data 
+                . Collect and analyze VPC flow logs, GKE network, firewall, load balancer logs 
+            - Analyze logs for security events 
+                . View audit logs and other events to investigate possible security events 
+    
+    --- Error Reporting 
+        . It counts, analyzes, and aggregates the crashes in our running cloud services.
+        - Real-time processing 
+            . Appliction errors are processed and displayed within seconds
+        - Quickly view and understand errors 
+            . A dedicated page displays the details of the error 
+        - Instant notifications 
+            . We are notified when events occur 
+
+    --- Appliction Performance Management Tools 
+        * Cloud Trace (a tracing system)
+            - Collects latency data from distributed applications and displays it in the Google Cloud Console 
+            - Captures traces from applications deployed on App Engine flexible and standard environment, Compute Engine VMs,
+              GKE containers, Cloud Run and non-Google cloud environments
+
+            - Latency reports 
+                . Provide performance insights in near-real time 
+                . Generate in-depth latency reports to surface performance degradations 
+                . Identify recent changes to application performance 
+
+        * Cloud Profiler 
+            - Poorly performing code increases the latency and cost of applications and web services every day, without anyone knowing 
+              or doing anything about it. Cloud Profiler changes this by using statistical techniques and extremely low-impact 
+              instrumentation that runs across all production
+
+            - Allows developers to analyze applications running anywhere 
+            - Presents the call hierarchy and resourcec consompiton of the relevant function in an interative flamer graph.
+        
+            
