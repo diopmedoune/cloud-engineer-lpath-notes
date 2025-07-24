@@ -14,6 +14,17 @@
 
 * Kubernetes offers several container runtime (software used to run a container form a container image) choices, but the Linux distribution 
   that GKE uses for its nodes launches containers that use containerd, the runtime component of Docker.
+
+
+* Although this open-source technology Docker can be used to create and run applications in containers, it doesn’t offer a way to orchestrate 
+those applications at scale like Kubernetes does.
+
+* You can write build configuration files to provide instructions to Cloud Build as to which tasks to perform when building a container. These 
+  build files can fetch dependencies, run unit tests, analyses and more.
+
+
+* In Kubernetes, a node represents a computing instance, like a machine. Note that this is different to a node on Google Cloud, which is a virtual 
+  machine that runs in Compute Engine.
 ----------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -28,7 +39,79 @@
         ----------- W'll come back to take notes -----------
 
 == Introduction to containers and Kubernetes ==
+    --- Containers  
+        - Lightweight because they don't carry a full operating system 
+        - Can be scheduled or integrated tightly with with the underlying system 
+        - Do not boot an entire VM or initialize an operating system for each application
+
+        - What make containers so appealing to developers?
+            . They're a code-centric way to deliver high-performing, scalable applications 
+            . They provide access to reliable underlying hardware  and software
+            . Code will run successfully regardless if it is on a local machine or in production 
+            . They make it easier to build applications that use the microservices design pattern 
+
+    --- Container Images 
+        - An application and its depedencies are called an image and a container i just a running instance of an image 
+        - A container has the power to isolate workloads, and this ability comes from a combination of several Linux technologies:
+            . The first is the foundation of the Linux process.
+            . The next technology is Linux namespaces.
+            . The third technology is Linux cgroups.
+
+        
+        !!! Not a best practice to build our application in the same container where we ship and run it 
+        --> application packaging relies on a multi-stage build process --> One container builds the final executable image and a separate container receives only 
+            what is needed to run the application.
+
+        - When launching a new container from an image, the container runtime adds a new writable layer on top of the underlying layers. All changes made to the 
+          running container are written to this writable container layer.
+        - Container images are ephemeral 
+
+        - How can we get or create containers ?
+            . Use publicly available open-source container images
+            . Google maintains Artifact Registry at pkg.dev, which contains public, open source images.
+            . Docker Hub Registry, GitLab 
+
+        * Google provides a managed service for building containers called Cloud Build
+            Cloud Build:
+                - Integrated with Cloud IAM 
+                - Designed to retrieve the source code builds from different code repositories 
+                    . Cloud Source Repositories 
+                    . GitHub 
+                    . Bitbucket 
     
+    *** LAB: Working with Cloud Build 
+        ----------- W'll come back to take notes -----------
+                
+    --- Kubernetes 
+        - Open-source platform for mannaging containerized workloads and services; make it easy to orchestrate many containers on many hosts, scale them as microservices 
+        and deploy rollouts and rollbacks.
+
+        - Is a set of APIs to deploy containers on a set of nodes called a cluster 
+        - Divided into a set of primary components that run as the control plane and a set of nodes tht run containers 
+        - We can describe a set of applications and how they should interact with each ohter and Kubernetes figures how to make that happen 
+
+        - Supports stateless apps 
+        - Supports stateful apps 
+        - Autoscales containerized apps 
+        - Allows resource request levels 
+        - Allows resource limits 
+        - Is extensible 
+        - Is open source and portable 
+
+    --- Google Kubernetes Engine 
+        - It's a managed Kubernetes service hosted on Google’s infrastructure.
+        - Designed to help "deploy", "manage" and "scale" Kubernetes environments for containerized applications 
+        - GKE features:
+            . Operating system are optimized to scale quickly 
+            . GKE Autopilot manages cluster configuration 
+            . GKE auto upgrade ensure clusters have the latest stable version of Kubernetes 
+            . GKE auto repair repairs unhealthy nodes 
+            . CKE scale the cluster itself 
+            . Cloud Build Integration 
+            . IAM integration 
+            . Google Cloud Observability Integration 
+            . VPCs integration
+            . The google cloud console provides insights into GKE clusters and their resources 
 
     
 == Kubernetes Architecture ==
@@ -144,8 +227,8 @@
     --- Object Manangement:
         ...
 
-        *** Lab: Deploying GKE Autopilot Cluster 
-            ....................................................................................
+        *** LAB: Deploying GKE Autopilot Cluster (from gcloud console)
+        ----------- W'll come back to take notes -----------
 
     
 == Kubernetes operations ==
@@ -204,3 +287,5 @@
             --> Integrate those changes into our container images and redeploy them 
 
 
+    *** LAB: Deploying GKE Autopilot Clusters from Cloud Shell 
+        ----------- W'll come back to take notes (used commands) -----------
