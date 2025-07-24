@@ -1,34 +1,5 @@
 === Getting Started with Google Kubernetes Engine ===
 
-----------------------------------------------------------------------------------------------------------------------------------------
-* Affinity is used to attract Pods to certain nodes, based on the node's attributes (node affinity) or based on the labels of other Pods 
-  running on those nodes (inter-pod affinity). This can ensure that Pods are placed on nodes that meet specific criteria, such as proximity 
-  to necessary resources or other Pods they need to communicate with.
-
-* Anti-affinity, on the other hand, is used to repel Pods from certain nodes. This is useful for spreading Pods across nodes to ensure high 
-  availability and resilience, preventing single points of failure.
-
-* Each node runs a small family of control-plane components called a kubelet. You can think of a kubelet as Kubernetes’s agent on each node.
-  When the kube-APIserver wants to start a Pod on a node, it connects to that node’s kubelet. Kubelet uses the container runtime to start 
-  the Pod and monitors its lifecycle, including readiness and liveness probes, and reports back to the kube-APIserver
-
-* Kubernetes offers several container runtime (software used to run a container form a container image) choices, but the Linux distribution 
-  that GKE uses for its nodes launches containers that use containerd, the runtime component of Docker.
-
-
-* Although this open-source technology Docker can be used to create and run applications in containers, it doesn’t offer a way to orchestrate 
-those applications at scale like Kubernetes does.
-
-* You can write build configuration files to provide instructions to Cloud Build as to which tasks to perform when building a container. These 
-  build files can fetch dependencies, run unit tests, analyses and more.
-
-
-* In Kubernetes, a node represents a computing instance, like a machine. Note that this is different to a node on Google Cloud, which is a virtual 
-  machine that runs in Compute Engine.
-----------------------------------------------------------------------------------------------------------------------------------------
-
-
-
 == Introduction to Google Cloud ==
     - Kubernetes is an orchestration framework for software containers. Containers are a way to package and run code that's more efficient 
      than virtual machines. Kubernetes provides the tools we need to run containerized applications in production and at scale
@@ -289,3 +260,33 @@ those applications at scale like Kubernetes does.
 
     *** LAB: Deploying GKE Autopilot Clusters from Cloud Shell 
         ----------- W'll come back to take notes (used commands) -----------
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+* Affinity is used to attract Pods to certain nodes, based on the node's attributes (node affinity) or based on the labels of other Pods 
+  running on those nodes (inter-pod affinity). This can ensure that Pods are placed on nodes that meet specific criteria, such as proximity 
+  to necessary resources or other Pods they need to communicate with.
+
+* Anti-affinity, on the other hand, is used to repel Pods from certain nodes. This is useful for spreading Pods across nodes to ensure high 
+  availability and resilience, preventing single points of failure.
+
+* Each node runs a small family of control-plane components called a kubelet. You can think of a kubelet as Kubernetes’s agent on each node.
+  When the kube-APIserver wants to start a Pod on a node, it connects to that node’s kubelet. Kubelet uses the container runtime to start 
+  the Pod and monitors its lifecycle, including readiness and liveness probes, and reports back to the kube-APIserver
+
+* Kubernetes offers several container runtime (software used to run a container form a container image) choices, but the Linux distribution 
+  that GKE uses for its nodes launches containers that use containerd, the runtime component of Docker.
+
+
+* Although this open-source technology Docker can be used to create and run applications in containers, it doesn’t offer a way to orchestrate 
+those applications at scale like Kubernetes does.
+
+* You can write build configuration files to provide instructions to Cloud Build as to which tasks to perform when building a container. These 
+  build files can fetch dependencies, run unit tests, analyses and more.
+
+
+* In Kubernetes, a node represents a computing instance, like a machine. Note that this is different to a node on Google Cloud, which is a virtual 
+  machine that runs in Compute Engine.
+----------------------------------------------------------------------------------------------------------------------------------------
+
