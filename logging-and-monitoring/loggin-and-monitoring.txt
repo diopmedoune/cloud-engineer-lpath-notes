@@ -1,5 +1,21 @@
 === Loggging and Monitoring in Google Cloud ===
 
+
+------------------------------------------------------------------------------------------------------------------
+Per Google's recommended best practices, the project we use to host the metrics scope will not be one of the projects 
+actually housing monitored resources.
+
+Note: If a Monitoring group is created based on labels, then the group will keep checking for powered off server for 
+5 minutes. After 5 minutes, Google Cloud determines the server should no longer be counted as a member of the group. 
+
+
+There are a couple ways to create a log sink to route log entries to the new log bucket:
+    1. From the Logs Router directly.
+    2. From Logs Explorer. You can run log queries to select and filter the logs you are interested in when you create a sink. 
+       The advantage to this approach is the log query is automatically copied to the sink configuration as the filter.
+
+------------------------------------------------------------------------------------------------------------------
+
 == Introduction to Google Cloud Observability ==
 
     --- Need for Google Clodu Observability 
@@ -133,4 +149,295 @@
             - Allows developers to analyze applications running anywhere 
             - Presents the call hierarchy and resourcec consompiton of the relevant function in an interative flamer graph.
         
+
+== Monitoring Critical  systems == 
+    --- Cloud Monitoring architecture patterns 
+        - Metric Colection 
+        - Metric Storage 
+        - Visualization and Analysis 
+
+    --- Hybrid monitoring and logging 
+        - Blue Medora BindPlane 
+            * With Google's partner BindPlane by Blue Medora, we can import monitoring and logging data from both on-premises VMs and 
+              other cloud providers
+            . BluePane collector 
+            . BluePane monitoring 
+            . BluePane collector
+            
+    --- Data model and dashbords 
+        - Time series data
+            . metric: metric field consiss of metric label and metric type that describes the metric 
+            . resource: field consists of resource-label and the resource information from which the metrics are collected 
+            . metricKind an ValueType: it tells us how to interprets the values 
+            . points: points are array of timestamped values that tells us what the values of the metrics are 
+        
+    --- Query metrics 
+        - MQL 
+            . It's an advanced query language. It provides an expressive, text-based interface to query Cloud Monitoring time-series data.
+            . Manipulate, retrieve, and perform complexe operations on time-series data 
+        - PromQL
+            . Query metrics form Google Cloud Managed Service for Prometheus 
+            . Query system metrics from GKE and Compute Enigne 
+            . Integrate with Grafana to chart metrics 
+
+            _ Why use MQL ?
+                - Create ratio-based charts and alerts 
+                - Perform time-shift analysis 
+                - Apply mathematical, logical, table operations and other functions to metrics 
+                - Fetch, join, and aggregate over multiple metrics 
+                - Select by arbitraryj, rather than predifined percentile values 
+                - Create new labels to aggregate data by, using arbitrary string manipulations including regular expressions 
+
+                . In the same way we compose and chain commands and data through pipes on the Linux command line, we can fetch metrics and apply operations by using MQL
+            
+
+    --- Uptime checks 
+        - They test test public service availability 
+
+    *** LAB: Monitoring and Dashboaring Multiple Projects
+        
+    --- QUIZ
+        What is the name of the project that hosts a metrics scope?
+        --> Scoping project
+
+== Alerting Policies ==
+    --- SLI, SLO and SLA 
+        - SLI: Service Level Indicator 
+            . SLIs are carefully selected monitoring metrics that measure one aspect of a service's reliability.
+
+        - SLO: Service Level Objective --> SMART
+            - Specific 
+            - Mesureable 
+            - Achievable 
+            - Relevant 
+            - Time-bound 
+
+        - SLA 
+            - It describes the minimu levels of service that we promiseto provide to our customers and what happens when we break that promise.
+
+    --- Developing an alerting stragy 
+        - Evaluating alerts 
+            . Precison -> Relevant alerts= Relevant+ irrelevant alerts ---- search ----
+            . Recall -> Relvant alerts = Relevant alerts + missised alerts
+            . Detection time -> How long it takes the system to notice an alert condition
+            . Reset time -> How long alerts fire after an issue is resolved 
+
+            * Alert window lengths 
+                - The window is a regular-length subdivision of the SLO total time.
+                - Small windows 
+                    . Faster alert detection 
+                    . Shorter reset time 
+                    _ For a 99.9 availability SLO over 30 days, a 10-minue window would alert in 0.6 seconds if a full outage occurrs
+                    . Consume only 0.02% of the error budget 
+                    
+
+                - Longer windows 
+                    . better precision 
+                    . Longer restet and detection times 
+                    _For a 99.9% availability SLO over 30 days, a 36-hour window would alert in 2minutes 10if a ful outage occurs 
+                    . Repersent 5% of the error budget 
+
+                
+    --- Creating alerts 
+        Use alerting policies to define alerts 
+            An alerting policy has:
+                . A name 
+                . One or more conditions 
+                . Notifications 
+                . Documentation 
+            
+            Alerting policies are two types:
+                . Metric-based alerting policies   
+                    Ex: Notify when the application that runs on a VM has hight latency for significant time period
+                . Log-based alerting policies 
+                    Ex: Notify when a human user accesses the security key of a service account 
+            
+        - We can create alerting policies using Terraform 
+    
+    --- Service Monitoring:
+        * Windows-based versus request-based SLOs
+            - Request-based SLOs = good request : total requests 
+                . Request-based SLOs = latency below 100ms for 95% of requests 
+            - Window-based SLO = total number of good request : tatal number of bad request 
+                . 95 percentile SLO = latency less than 100ms for 99% of 10 minute windows 
+            
+        !!! Windows-based SLOs can be tricky, because they can hide burst-related failures.
+
+
+    *** LAB: Service Monitoring 
+    ............................................................................
+
+
+    --- QUIZ: 
+        _ In evaluating your alerting policies, which below best describes precision?
+        -->  The proportion of events detected that were relevant to the sum of relevant and irrelevant alerts.
+        _ In the statement “Maintain an error rate of less than 0.3% for the billing system”, what is an SLI? 
+        -->  Error rate 
+        _ Explain recall.
+        --> The proportion of alerts detected that were relevant to the sum of relevant alerts and missed alerts.
+    
+    
+== Advanced Logging and Analysis ==
+
+    --- Cloud Logging overview 
+        - Collection
+            . These are the places where log data originates.
+        - Log Routing 
+            . The Log Router is responsible for routing log data to its destination.
+            . It uses a combinaison on inclusion filters and exclusion filters to determine which log data is routed to each destination 
+        - Log sinks
+            . Log sinks are destinations where log data is stored.
+            . Cloud Logging supports a variety of log sinks, including: 
+                _ Cloud Logging log buckets: These are storage buckets that are specifically designed for storing log data.
+                _ Pub/Sub topics: These topics can be used to route log data to other services, such as third-party logging solutions.
+                _ BigQuery: This is a fully-managed, petabyte-scale analytics data warehouse that can be used to store and analyze log data.
+                _ Cloud Storage buckets: Provides storage of log data in Cloud Storage.
+            . Log entries are stored as JSON files.
+    
+    --- Log types and collection 
+        * Avaibalbe logs 
+            - Platform logs 
+                . Platform logs are logs written by Google Cloud services.
+                . For example, VPC Flow Logs record a sample of network flows sent from and received by VM instances
+            -  Component logs 
+                .  Component logs are similar to platform logs, but they are generated by Google-provided software components that run on our systems.
+            - Security logs 
+                . Security logs help us answer "who did what, where, and when."
+                . Cloud Audit Logs provide information about administrative activities and accesses within our Google Cloud resources.
+                . Access Transparency provides us with logs of actions taken by Google staff when accessing your Google Cloud content.
+            - User-written logs 
+                . User-written logs are logs written by custom applications and services.
+                . Typically, these logs are written to Cloud Logging by using one of the following methods: Ops Agent, Cloud Logging API, Cloud Logging client libraries.
+            - Multi/Hybrid Cloud logs 
+                . Multi-cloud logs and Hybrid-cloud logs refer to logs from other cloud providers like Microsoft Azure and logs from on-premises infrastructure.
+
+    --- Storing, routing and exporting the logs 
+        - Exporting back to Splunk 
+            --> Events --> Logging --> Pub/Sub --> Splunk 
+
+        - Aggreagation levels 
+           . A project-level log sink exports all the logs for a specific project
+           . We can includ log filter
+        - Folder
+            . A folder-level log sink aggregates logs on the folder level and can include logs from children resources (subfolders, projects).
+        - Organization 
+            . An orrganization-levl log sink aggreagates logs on the orrganization level 
+        - Finding entries quickly 
+            . Search on an indexed field 
+                httpRequest.statatus, logName, operation.id, resource.type, timestamp, severity 
+            . Apply constrains on resource.type and resource.labels field 
+                resource.type = "gke_cluster" 
+                resource.labels.namespace = "my-cool-namespace" 
+            . Be specific on which logs we're searching 
+                logName = "projects/benkelly-test/logs/apache-access" 
+            . Limit the time range that we're searching 
+                timestamp >= "2018-08-08T10:00:00Z" and timestamp <= "2018-08-08T10:10:00Z"
+
+    --- Using log-based metrics 
+        - Log-based metrics are suitable in different cases 
+            . Count the occurences 
+                Count the occurences of a message like a warning or error in your logs and recieve a notification when the number of occurences crosses a threshold 
+            . Observ trends in your data 
+                Observe trends in your data, like latency values in your logs, and receive a notification if the values change in an unacceptable way. 
+            . Visualize extracted data 
+                Create charts to display the numeric data extracted from your logs.
+        - Log-baseed metric types 
+            . Counter metrics 
+                Count the number of matched log entries 
+            . Distrubution metrics 
+                Record the statistical distribution of the extracted log values 
+            . Boolean metrics 
+                Record where a log entry matches a specified filter 
+            
+    ---  Log analytics:
+        Log Analytics gives us the analytical power of BigQuery within the Cloud Logging console and provides us with a new user interface that's optimized for analyzing our logs.
+        - Cloud Logging and Log Analytics use cases 
+            . Troubleshooting 
+                Get the root cause with search, filtering, histogram and suggested searches 
+            . Log Analysis 
+                Analyze application performance, data access and network access patterns 
+            . Reporting 
+                Use the log data in Log Analytics directly from BigQuery to report on aggregated application 
+        - How different is analytics-enabled bucket log data from logs routed to BigQuery 
+            . Log data in BigQuery is managed by Cloud Logging 
+            . BigQuery ingestion and storage costs are included in our logging costs 
+            . Data residency and lifecycle are managed by Cloud logging
+
+    *** LAB: Log Analytics on Google Cloud 
+        .................................................
+    
+
+== Working with Audit Logs == 
+    --- Cloud Audit Logs 
+        "Who dit what, where, and when ?"
+            - Admin Activity audit logs: record modification to configuration or metadata.
+            - System Event audit logs: record Google Cloud non-human admin actions that modify configurations 
+            - Data Access audit logs: record calls that read metadata, configurations, or that create, modify or read user-provided data 
+            - Policy Denied audit logs: record a security policy violation 
+
+    --- Data Access audit logs 
+        - Porgramatically enabling Data acess Audit logs 
+            --> Image link: https://drive.google.com/file/d/1HQwFEGhdEBiP_jHnv5ePsLGPSEBh0Jky/view?usp=drive_link
+    
+    --- Audit logs entry format 
+        What distinguishes an audit log entry from other log entries is the protoPayload field, which contains an AuditLog object that stores the audit logging data.
+        
+    --- Best practacies 
+        - Plan and create test projects 
+            . Create a plan for Data Access audit logs
+            . Create a test project and test plan
+            . Then roll out the plan and don't forget automation (IaC)
+            
+        - Infrastructur as Code (IaC)
+            . Run open source or pay for enterprise version 
+            . State can be stored locally or remote in Cloud Storage or Terraform Cloud.
+            . We can use Terraform to enable audit logs 
+            . Audit logs keep us informed on the resources provisioned using an IaC tool 
+            . The platform supports configuration files, which can be put through a CI/CD pipeline, like with code.
+
+        - Aggregate and store our Organization's lgos 
+            . Centralize or subdivide log storage by creating user-defined buckets 
+            . Configure a default storage location at the Organization level to automatically apply a region 
+            . Protect our audit logs storage by configuring customer-managed encryptions keys (CMEK)
+        
+        - Principle of leasst privilege 
+            . Side-channel leakage of data through logs is a common issue 
+            . Plan the project to monitoring project relationships 
+            . Use appopriate IAM controls on both Google Cloud-based and exported logs
+            . Data Access audit logs contain personally identifiable information (PII)
+        
+        - Configure log views 
+            . Help controll access to logs in a log bukcet 
+            . Help control access specific to a project or set of users
+            . Help protect sensitive log data 
+        
+        - Scenario: Operatonal monitoring 
+            . CTO: resourcemanager.organizationAdmin 
+                -> Assings permissions to security team and service account 
+            . Security team: logging.viewer 
+                -> Ability to view Data Access audit logs 
+            . Assign all permissions at organization level 
+            . Control exported data access  through Cloud Storage and BigQuery IAM roles
+            . Use Sensitive Data Protection to redact PII 
+        
+        - Scenario: Development teamns monitoring Audit Logs 
+            . Security teamn remain the same:
+                -> logging.viewer, logging.privateLogViewer 
+            . Dev team: logging.viewer at folder level 
+                -> See Admin Activity audit logs by dev projects in folder
+            . Dev team: logging.privateLogViewer at folder level 
+                -> Se Data Access audit logs 
+            . Use Cloud Storage or BigQuery IAM to control access to exported logs 
+                -> Providing a dashbord migh be helpful 
+                
+        
+    *** LAB: Cloud Audit Logs 
+        We use IAM to enable Audit Logs 
+        ......................................................................................
+
+    --- Quizz:
+        Why are the Data Access audit logs off by default? Select three.
+            - The can be large 
+            - May contian sensitive information 
+            - The can be expensive to store 
             
