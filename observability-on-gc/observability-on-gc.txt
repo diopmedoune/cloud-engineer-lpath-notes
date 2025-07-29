@@ -1,0 +1,306 @@
+=== Observability in Google Cloud ===
+
+
+------------------------------------------------------------------------------------------
+Prometheus is an open-source monitoring and alerting toolkit 
+Prometheus Query LAB = PromQL 
+VM hypervisor only knows how much memory is allocated to each VM, not how much of the allocated memory the VM is actually using.
+There is no charge for your Admin Activity audit logs.
+
+OpenTelemetry is an open-source observability framework that standardizes the generation, collection, and description of telemetry 
+data (traces, metrics, and logs) for observability
+
+OTLP --> OpenTelemetry Protocol  
+
+"Rate" typically refers to the number of requests or operations that can be processed within a specific time frame.
+
+A rolling window refers to the time range over which data points are considered when evaluating a metric-based alerting polic
+
+Cloud NAT can automatically scales the number of NAT IP address that it uses. It's not dependent on a single physical gateway device.
+It is a fully managed, proxyless NAT service in Andromeda.
+
+Andromeda is Google Cloud Platform's (GCP) network virtualization stack, designed to provide high performance, isolation, scalability, 
+rapid provisioning, low latency, and feature velocity.
+
+Workers run on the physical host and not on your VM.
+------------------------------------------------------------------------------------------
+
+== Configuring Google Cloud Services for Observability == 
+    --- Introduction to Ops Agent 
+        . The Ops Agent is the primary agent for collecting telemetry data from our Compute Engine Instance.
+        . We can configure the Ops agent to monitor many third-party applications such as Apache, mySQL, Oracle database, SAP HANA, and NGINX.
+        _ Why OPs Agent ?
+            . Monitors our VM instances without the need for any additional configuration after the installation
+            . Monitors third-party applications and supports both windows and Linux guest OS 
+            . Exposes many additional process metrics beyond memory and gives us better visibility to CPU, disk, and network performance
+            . Unifies gathering of metrics and logs into a single agent 
+            . Ingests user-defined metrics in Prometheus format 
+
+        - Troubleshooting: Agent is not sending metrics to Cloud Monitoring 
+            . Check the metrics module in syslog 
+            . If there are no logs, then the agent is not running 
+            . If you see permission, then the agent service is not running 
+            . If you see permiession_denied errors when writing ot the Monitoring API, enable the Monitoring APIand the Monitoring Metric Witer role 
+
+    --- Non-VM resources 
+        * app Engine 
+            . Standart and flexible environments support Cloud Monitoring 
+            . Standard and flexible environments support Cloud Logging 
+                -> Support writing to stdout or sterr from code 
+                -> Support language-specific loggin APIs (like Winston on Node.js)
+                -> Let us view Logs under GAE Appliction resource  
+
+        * Monitoring and logging in Cloud Run functions 
+            - Cloud Run functions monitoring is automatic and can provide us with access to invocations, execution times, memory usage, and active instances in the Google Cloud console 
+            - Logs written to stdout or stderr will appear automatically in the Google Cloud console.
+
+            . For fully managed Cloud Run and Cloud Run for Anthos: For fully managed Cloud Run, the monitoring resource name is "Cloud Run Revision" (cloud_run_revision)
+            . For Cloud Run for Anthos, the monitoring resource name is "Cloud Run on GKE Revision" (knative_revision)
+            . Cloud Run has two types of logs which are automatically sent to Cloud Logging: request logs and container logs.
+            
+    --- Cloud Operations for GKE 
+        - Configuring Cloud Operations for GKE clusters 
+            * For new cluster 
+                . Cloud and Cloud Logging is enabled by default 
+                . Under "Components", we select the components from which we want to collect logs and metrics 
+                . Optionnaly, we can enable Managed Service for Prometheus 
+            
+    --- Google Cloud Managed Service for Prometheus 
+        -> It make easy to:
+            - Collects, stores, and analyzes Prometheus metrics 
+            - Collects metrics for both GKE and Compute Engine environments
+            - Helps make GKE easier to use with maintained metric collectors 
+        
+        -> Architecture link: https://drive.google.com/file/d/1OyY6o1aq-Zmb5itKsc0q5BSYgS9UfPYH/view?usp=drive_link
+
+        * Data collection options 
+            - Managed data collection  
+                . Managed data collection in Kubernetes environments 
+                . Recommended approach for all Kubernetes environments 
+
+            - Self-deployed collection 
+                . Prometheus installation managed by the user 
+                . Suitable for quick integrations into complex environment 
+            - The Ops Agent 
+                . Prometheus metrics scraped and send by the Ops Agent 
+                . Recommended for sending Prometheus metric data 
+            - OpenTelemetry 
+                . OpenTelemetry Collector uses a single collector to collect metrics from any environment and then sends them to any compatible backend
+                . Recommended for cross-signal workflows such as exemplars 
+
+        * Rule and alert evaluation 
+            Managed Service for Prometheus provides a standlone rule evaluator for evaluating, recording, and alerting rules 
+            . There's no need to co-locate the data 
+            . Migration to Managed Serivce for Prometheus is made easier 
+    
+    --- Exposing user-defined metrics 
+        - User-defined metrics 
+            . Any metrics not difined by Google Cloud are user-defined metrics 
+            . They are used to extract metrics that are not captured by the buit-in metrics 
+        - Two approches 
+            . Use OpenTelemetry Protocol (recommended)
+            . Use the Cloud Monitoring API
+
+    *** LAB: Monitoring a Compute Engien by using Ops Agent 
+        In this lab, we learned how to install Ops Agent on a VM and use it to set an alerting policy to notify a recipient of potential issues with the instance.
+
+
+== Monitoring Google Cloud Network == 
+    --- VPC Flow Logs 
+        . It is used to monitor network by recording a portion of network flows sent and received by VM instances (including GKE nodes)    
+        * VPC Flow Logs properties 
+            - Samples are form the VM's perspectives 
+            - Samples are logged for each VMs 
+            - VMs support multiple network interface 
+        
+        * Enabling VPC Flow Logs 
+            - VPC Flow Logs is activated or desactivated at a subnet level 
+                . All VMs within that subnet have VPC Flow Logs automatically enabled 
+            - We can enalbe VPC Flow LOgs during subnet creation 
+                . We can optionnally adjust log sampling and aggregation to adjust the metadata and sample rate written to logs 
+
+        * Log entries contain many useful fields 
+            - src_ip --> Source IP address 
+            - src_port --> Source Port 
+            - dest_ip --> Destination IP address 
+            - dest_port --> Destinaiton port 
+            - protocol -> IANA protocol number 
+
+        * Firewall Rules Logging 
+            It can help answer the question like:
+                - Did my firewall rules cause that application cause that application outage ?
+                - How many connections match the rule I just created ?
+                - Are my firewall rules stopping (or allowing) the correct traffic 
+
+            . By default firewall rules logging is desabled. It can only record TCP and UDP connections 
+        
+        * Enabling Firewall Rules Logging in the CLI 
+            - To activate 
+                $ gcloud compute firewall-rules update [FIREWALL_RULE_NAME] --enable-logging 
+                $ gcloud compute firewall-rules updata [FIREWALL_RULE_NAME] --no-enable-logging 
+
+        * Troubleshooting:  Using rules to catch incorrect traffic 
+            - Logging all denied connections creates to many log entries 
+            - Temporarily create a high-priority rule to allow traffic to the server 
+            - If traffic now gets through, examine the logs to find the root cause 
+        
+    --- Load balancer logs 
+        - All the Google Cloud load balancers support Cloud Logging and Cloud Monitoring 
+            . Internal and External Appliction Load Balancers 
+            . Internal and External Network Load Balancers 
+            . Internal and external Proxy Load Balancers 
+        - The log type, lof fields, and metrics supported vary based on the load blancer type
+        - Load balancing logs can be used to debug and analyze user traffic 
+
+        - The internal and external Appliction Load Balancers support logging 
+            -> Activated and deastivated on a per backend service basis 
+                . For external Application Load Balancers with backend buckets, logging is automatically enabled and cannot be deactivated 
+                . Logging can be enabled on a per backend service basis 
+                . URL map migh reference more than on backend service 
+                . Use exclusion, if we do not wan the logs to be stored in Cloud Logging 
+
+        - Fields in log record 
+            - LogEntry
+                Contains severity, project ID, project number, and timestamp information 
+            - httpRequest 
+                Contains a method, URL, status, remote IP address, latency srting 
+            - resource 
+                Contains the monitored resource associated with a log entry 
+            - jsonPayload 
+                Contains statusDetails field that includes a string that explains why the load balancer retruned the HTTP status, cache and failure information 
+
+        * Example of using a laod balancing log record 
+            -> HTTP error respone code (5XX)
+            - Refer to LoadBalancer logs to determine the source of error 
+                . statusDetais field: response_sent_by_backend  --> indcate is is a backend issue 
+                . statusDetails field: failled_to_pick_backend indicates that the load balancer failed to pick a healthy backend to handle a request 
+
+        - Cloud NAT logging 
+            -> A NAT log is created when:
+                . A network connect using NAT is created 
+                . A packet is dropped due to port unavailability 
+                . It lets us log NAT connections and/or errors 
+                . Logs contain TCP and UDP traffic only 
+                . The log rate threshold will reach a maximm of 50-100 entries per second, per vCPU 
+        
+        - Packet Mirroring: Visualize and protect our network 
+            . It clones VPC instance traffic and forwards for examination 
+            . Packet Mirroring polices are tied to workload and not VPC 
+
+        - Packet Mirroring: Overcoming bandwidth limitations 
+            -> Packet Mirroring consumes the egress bandwidth of the mirrored instances 
+                . Use filters to reduce the bandwidth on mirrored intances 
+                . Filters can be based on protocol, IP ranges, traffic directions, ect 
+                . The current maximum of filters for Packet Mirroring is 30 
+        
+        - Packet Mirroring: Use cases 
+            . Network and application monitoring 
+            . Security and compliance 
+            . Network forensics for PCI compliance 
+
+        - Monitoring Packet Mirroring 
+            -> Use metrics to verify that instances are being mirrored as intended 
+                . Mirrored Packets count 
+                . Morrored Bytes count 
+                . Dropped Packets count 
+            -> Monitoring can also spot where packet mirroring shouldn't happening 
+
+    --- Network Intelligence Center 
+        - Centralized network monitoring and visibility 
+        - Reduced troubleshooting time and effort 
+        - Improved overall user experience 
+
+        -> Currently, it offers five modules:
+            - Network Topology
+                . to visualizes our Google Cloud network as a graph. 
+            - Connectivity Tests
+                . Quickly diagnose connectivity issues and prevent outages 
+                . Verify the configuration change effect to help prevent outages 
+            - Performance Dashboard
+                . gives us visibility into the performance of our VPC
+                . The Packet Loss tab shows the results of active probing between our VMs in a given VPC.
+            - Firewall Insights
+                . helps us understand and optimize our firewall rules 
+                . provides data about how your firewall rules are being used, exposes misconfigurations, and identifies rules that could be made more strict
+                * Firewall Insights metrics let us analyze how our firewall rules are used 
+                    - Verif that firewall rules are being  used in the intended way 
+                    - Verify that firewall rules allow or block thier intended connections 
+                    - Perform live debugging of connections that are inadvertenly dropped 
+                    - Discover malicious attempst to access our network 
+            - Network Analyzer
+                . It automatically monitors our VPC network configurations 
+                . Detects misconfigurations and suboptimal configurations 
+                . Identifies network faillures, provides root cause information, and suggests possible resolutions 
+
+    *** LAB: Analyzing Network Traffic with VPC Flow Logs 
+        We have configured a VPC network, enabled VPC Flow Logs, and created a web server in that network. Then, we generated HTTP traffic to the web server, 
+        viewed the traffic logs in the Cloud console, and analyzed the traffic logs in BigQuery. Finally, we used VPC Flow Log aggregation for balancing our 
+        traffic visibility and storage cost.
+        
+        There are multiple use cases for VPC Flow Logs. For example, we might use VPC Flow Logs to determine where your applications are being accessed from 
+        in order to optimize network traffic expense, to create HTTP load balancers to balance traffic globally, or to deny unwanted IP addresses with Cloud Armor.
+
+
+== Investigating Application Performance Issues == 
+    --- Error Reporting overview:
+        . Counts, analyzes and aggreagates the crashed to report them on our preferred notification channel 
+            Error Reporting can only analyze log entries that:
+                - Are stored in Cloud Logging buckets in the global region 
+                - Have the same source and destination Google Cloud projects 
+                - Have the customer-managed encryption keys (CMEK) disabled 
+
+        - Error Reporting features 
+            . Understand errors 
+                Error reporting brings processed data directly that help fix the root causes faster 
+            . Automatic and real-time 
+                Problems are intellgently aggregated into meaningful groups tailored to our programming language and framework 
+            . Intant error notification 
+                Instantly alerts us when a new application error cannot be grouped with existing one 
+            . Broad language and product support 
+                - App Engine standard and flexible environments 
+                - Cloud Run functions 
+                - Apps Script 
+                - Cloud Run 
+                - Compute Engine 
+                - Amazon EC2 
+                - GKE 
+
+        * Setting up Error Reporting 
+            Image link: https://drive.google.com/file/d/1IF6TrzfBz8JB9-xbx39mxEk5nVaU-5iH/view?usp=drive_link
+
+    --- Cloud Trace tracks application latency 
+        It's a distributed tracing system that collects latency data from our applications and displays it in the Google Cloud console 
+        The language-specific SDKs of Trace can analyze projects that run on VMs (even VMs not managed by Google Cloud).
+        A trace is a collection of spans.
+        . Helps with issue detection 
+        . Identifies performance bottlenecks 
+        . Provides broad language support 
+
+        - Cloud Trace terminologies 
+            . Tracing client 
+                Tracing client collects spans and sends them to Cloud Trace 
+            . Trace 
+                Trace describes the time  it take an application to complete a single operation 
+            . Span 
+                Span describes how long it takes to perform a complete suboperation 
+            
+        * Sending trace data to Cloud Trace 
+            - Automatic tracing 
+                . App Engine standard environment with Java 8, Python3, and PHP5 applications 
+                . HTTP requests and latency data from Cloud Run functions and Cloud Run 
+            - Instrumenting the application 
+                . Using Google client libraries or OpenTelemetry (recommended)
+        
+        - Required IAM permissions 
+            - Cloud Trace Agent role is needed to send trace data from the application to Cloud Trace 
+            
+            - These products have defaut access:
+                . App Engine 
+                . Cloud Run 
+                . Cloud Run functions 
+                . Google Kubernetes Engine 
+                . Compute Engine 
+
+            - Compute Engine and GKE get that access through the default Compute Engine service account.
+            
+    --- Profilter
