@@ -1,0 +1,319 @@
+=== Getting Started with Terraform for Google Cloud === 
+
+--------------------------------------------------------------------------------------------------------------------------------------
+Difference varaibles.tf terraform.tfvars 
+--------------------------------------------------------------------------------------------------------------------------------------
+
+== Introduction to Terraform for Google Cloud == 
+    --- Infrastructure as Code 
+        - What is Infrastructure as Code (IaC) ?
+            Instead of clicking around a web UI or using SSH to connect to a server and manually executing commands, 
+            with IaC we can write cod in files to define, provision and manage our infrastructure.
+        
+        - DevOps 
+            . Emphasizes collaboration and communication between developer and operations teams
+            . Automates software delivery and infrastructure changes.
+
+        * Problems that IaC can solve
+            - Inability to scale rapidly 
+                . Requires rapid scaling of IT infrastructure 
+            - Operational bottlenecks  
+                . Challenge of managing infrastructure consistently in scale 
+            - Disconnected feeback loops 
+                . Communicaition gap between software an IT teams 
+            - High manual errors 
+                . Increased scale leads to increased human errors 
+            
+        * Benefits of IaC manipulate Google Cloud APIs to deploy the infrastructure 
+            - Configuration Management
+            . Declarative --> Specify the disired state of infrastructure, not updates 
+            . Code management --> Commit, version, trace, and collaborate, just like source code 
+            . Auditable  --> Compare infrastructure between disired state nd current state 
+            . Portable --> Build reusable modules across an organization 
+
+        * Provisioning versus configuration 
+            - Infrastructure as code 
+                . Used for provisioning and managing cloud resources 
+                . Example: Creationg and provisioning a VM instance 
+                . Refering to framework that
+
+            - Configuration Management 
+                . Used for virtual machine OS-level configuration 
+                . Example: Configuring the internals of the VMs 
+                . Refering to package configurations and software maintenance 
+
+            - Example:
+                . Infrastructure as code --> Launch a GKE cluster 
+                . Configuration management --> Deploy containers into the GKE cluster 
+            
+            - IaC takes a declarative approach to infrastructure 
+                Imperative workflows make it difficult to determine the difference between live infrastructure and our desired state, leading to repeated resource creation.
+                With IaC, we declare the desired state of your infrastructure and let the tool determine the details.
+
+
+    ---  Terraform Overview  
+        * IaC configuration workflow 
+            - Scope 
+                Confirm the resources required for a project 
+            - Author 
+                Author the configuration files based on the scope 
+            - Initialize 
+                Download the provider plugins and initialize directory 
+            - Plan 
+                View execution plan for resources created, modified or destroyed 
+            - Apply 
+                Create actual infrastructure resources 
+
+        * Terraform use cases 
+            - Manage infrastructure 
+                Terraform takes an immuable approach to building and managing infrastructure 
+            - Track changes 
+                Terraform enables us to review the changes before they are applied to the configuration setup 
+            - Automate changes 
+                Terraform defines the end state of the infrastructure instead of a seris of steps to achieve it 
+            - Standardize the configuration 
+                Terraform uses modules to implement best practices and improve efficiency 
+            
+    --- Using Terraform 
+        - Terraform recognizes configuration written in .tf file 
+        - Terraform generates an execution plan 
+        - Terraform uses this plan to create infrastructure 
+        - Terraform determines the changes and creates incremental execution plans 
+        
+        * Running Terraform in production 
+            - Terraform Community Edition 
+            - Terraform Cloud 
+            - Terraform Enterprise 
+        
+
+    --- Terraform Configuration and the HashiCorp Language 
+        * HashiCorp Configuration Language 
+            - Terraform's configuration language for creating and managing API-based resources
+            - Configuration language, not a programming language 
+            - Includes limited set of primitives such as variables, resources, outputs and modules 
+            - Includes no traditional statement or control loops 
+
+        * HCL syntax 
+            - Block, Arguments, Indentifiers, Expressions, Comments 
+        
+    
+    --- Author Phase Terms and Concepts 
+        * Resources are code blocks that define the infrastructure components.      
+        - variables 
+            . Parametrize resource arguments to elimintate hard coding its values 
+            Example: Region, project ID, zone, etc 
+            . Define a resource attribute at run time or centrally in a file with a .tfvars extension 
+         
+        - Outputs 
+            . Output values are stored in outputs.tf file 
+            . Output values expose values of resource attributes 
+        
+        - State 
+            . Terraform saves the state of resources it manages in a state file 
+            . The state file can be stored 
+                -> Locally (default)
+                -> Remotely in a shared location 
+            
+            * We do not modify this file 
+
+        - Module 
+            A terraform module is a set of Terraform configuration files in a single directory
+            . It is the primary method for code reuse in Terraform 
+
+    --- Terraform commands 
+        terraform init ---> Initialize provider with plugin 
+        terraform plan ---> Preview of resources that will be create afer terraform apply 
+        terraform apply --> Create real infrastructure resources 
+        terraform fmt  ---> Auto format to match cononical conventions 
+        
+    --- The Terraform Validator 
+        . It's a tool for enforcing policy compliance as part of an infrastructure CI/CD pipeline 
+        - Automate validation, Governace policies, Security violation 
+        - Optional, runs pre-deployment checks against organizations policies 
+    
+    --- Terraform Validator Benefits 
+        - Enforce policies --> Enforce policies at any stage of application development 
+        - Remove manual erros --> Remove manual errors by automating plicy validation 
+        - Reduce time to learn --> Reduce learning time by using a single paradigm for all policy management 
+
+
+== Writing Infrastructure Code for Google Cloud == 
+    --- Introduction to Resources 
+        - Resources are infrastructure elements we can configure using Terraform 
+        Resources includes:  
+            Compute Engine instance, VPC, Cloud Storage bucket, Firewall rules, Cloud VPN, Cloud LB, Cloud Router  
+        
+        - Terraform uses the underlying  APIs of each Google Cloud service to deploy our resources 
+
+        - A resource is identified by the resource keyword, followed by the resource type.
+
+
+    --- Meta-arguments for Resources 
+        - Meta-arguments customize the behavior of resouces 
+            . count 
+                --> Create multiple instances according to the value assigned to the count 
+            . for_each
+                --> Create multiple resource instances as per a set of strings 
+            . depends_on
+                --> Define life cyle of a resource 
+            . lifecycle 
+                -->  Define life cycle of a resource; with the lifecycle argument you can prevent destruction of a resource for 
+                     compliance purposes, and create a resource before destroying the replaced resource
+            . provider
+
+        
+    --- Resource Dependencies 
+        - Dependency graph 
+            . Built from the terraform configurations 
+            . Interpolates attributes during runtime 
+            . Determines the correct order of operations 
+        
+        * Implicit dependency 
+            . Dependencies known to Terraform are detected  automatically 
+        * Explicit dependency 
+            . Dependencies unknown to Terraform must be configured explicitly 
+            . The depends_on argument gives us the flexibility to control the order in which Terraform processes the resources in a configuration.
+
+    --- Variables 
+        - Variables overview
+            . Variables separate source code from value assignments
+            . They allow us to assign a value to the resource attribute at run time 
+            . Variables separate source code from value assignments 
+        
+        - Variables argumensts
+            . To access the value of a variable declared within the module, we can use the expressions var; ex: var.bucket_storage_class 
+            . sensitive (ex: sensitive = ture) -->  variable argument used to protect sensitive information from being displayed in command outputs or log files
+
+        * Various ways to assign values to variables 
+            - .tfvars: Useful for quickly switching between sets of variables and versioning them
+                # .tfvars file (Recommnd method) 
+                $ tf apply -var-file my-vars.tfvars 
+
+            - CLI options: Useful when running quick examples on simple files 
+                # CLI options 
+                $ tf apply -var project-id="my-project"
+
+            - Environnment variables: Useful in scripts and pipelines 
+                # envirionment variables 
+                $ TF_VAR_project_id="my-project"
+                $ tf apply 
+
+            - CLI prompt: If a required variable hasnot been se via on of the above 
+                ? here ? # if using terraform.tfvars 
+                         $ tf apply 
+                
+            - Assign a value to the variable 
+                . Terraform automatically loads the variable definitions files as long as they are exactly named terraform.tfvars, terraform.tfvars.json, auto.tfvars, auto.tfvars.json 
+                $ tf apply -var-file my-vars.tf 
+
+
+    --- Varibles Best Practices 
+        * Parametrize only when necessary 
+            . Only parametrize values that must changes for each instance or environment 
+            . Changing a variable with a defaut value is backward-compatible 
+            . Removing a variable is not backward-compatible 
+
+        * Provide values in a .tfvars file 
+            Command-line options are ephemeral and easy to forget, and they cannot be checked into source control.
+
+     
+    --- Output values 
+        They expose the information about the resource to the user of the Terraform configuration 
+        * Output arguments 
+            - value 
+            - description 
+            - sensitive --> Mas values to a resource attribute 
+            
+
+    --- Terraform Registry and Cloud Foundation Toolkit 
+        * Terraform Registry
+        - Interactive resource for discoverign providers and modules 
+        - Solutions developed by HashiCorp, third-party vendors, and the Terraform community 
+
+        * Cloud Foundation Toolkit (CFT)
+            - CFT provides a series of reference modules for Terraform that reflect Google best practices 
+            - These modules can be used to quickly build a repeatable foundation in Google Cloud
+            - CFT modules let us maintain the IAM roles for multiple projects within the same module, as opposed to updating roles for each project individually
+
+        * Infrastructure Manager 
+            - Managed service 
+                    . Terraform configuration difines infrastructure 
+                    . Infra manager deploys onto Google Cloud 
+            ! Doesn't manage the deploymentn fo applications onto resources 
+                . To do this we can use products like Cloud Build, Cloud Deploy, or third-party apps 
+            
+    *** LAB: Creating Resources Dependencies with Terraform 
+        In this lab, we have a VM instance with a static IP address to view how implicit resource dependencies are handled with Terraform. we then created an explicit 
+        dependency by adding the depend_on argument so that we can create a GCS bucket before creating a VM instance. We also viewed the dependency graph that terraform 
+        uses to trace the order of resource creation.
+
+        $ terraform graph | dot -Tpng > graph.png  ---> to view depedency graph 
+
+
+== Organizing and Reusing Configuration with Terraform Modules ==
+    --- Introduction to Terraform Modules 
+        - Each module is repersented by a folder with main.tf file amoung others 
+
+    --- Modules use cases and benefits 
+        * Use cases
+            - Modularize code 
+                When we want ot organize ourTerraform configuration in modules so that it's readable and manageable
+            - Eliminate repetition 
+                When a faire bit of code is repeated multiple times
+            - Standardize resources 
+                When a set of resources has to be created in a specific way 
+        
+        * Benefits 
+            - Readable, Reusable, Abstract, Consistent 
+        
+    --- Reuse Conigurations with Modules 
+        * Calling the module to reuse the configuration 
+            ---> Image link: https://drive.google.com/file/d/1IVlnwzcbGLMLCXVVoKozT8iWtS0K5k0r/view?usp=drive_link
+
+        * Module Source: Terraform, GitHub 
+            ---> Image link: https://drive.google.com/file/d/1JsQ8bcS7Ow3dBiMl8tNOoUireeSlbUep/view?usp=drive_link
+
+
+    --- Variables and Outputs 
+        * Parametrize our configuration with input variables 
+            1. Replace the hard coded argument with a variable 
+            2. Declare the varaibles.tf file 
+            3. Pass the value for the input variable when we call the module 
+            ---> Image link: https://drive.google.com/file/d/1M7Q5gY-GaYHnH6GAczAP_GiCx8Jmd8oO/view?usp=drive_link
+
+        * Using output values  
+            1. Declare the output value in the netowork module 
+            2. Declare the argument as a variable in the server module 
+            3. Refer the output value when calling the server module 
+
+    --- Best Practices 
+        1. Modularize our code for keeping our codebase DRY and encapsuling best practices 
+        2. Parametrize modules intellgently only if the make sense for end users to change 
+        3. Use local modules to organize and encapsulate our code 
+        4. Use the public Terraform Registry for complementing complex architecture confidently 
+        5. Publish and share our module with our team 
+
+
+    *** LAB: Automating Deployment of Infrastucre Using Terraform 
+        In this lab, we created a Terraform configuration with a module to automate the deployment of Google Cloud infrastructure. 
+        As our configuration changes, Terraform can create incremental execution plans, which allows us to build our overall configuration step by step.
+    
+        The instance module allowed us to re-use the same resource configuration for multiple resources while providing properties as input variables. We 
+        can leverage the configuration and module that we created as a starting point for future deployments.
+
+
+    Quiz: Organizing and Reusing Configuration with Terraform Modules  
+        What is the purpose of output values within modules?
+        --> Pass resource attributes outside a module.
+        What happens when a version argument is specified in a module block?
+        --> Terraform automatically upgrades the module to the latest version matching the specified version constraint. 
+    
+    
+
+
+
+
+
+
+
+

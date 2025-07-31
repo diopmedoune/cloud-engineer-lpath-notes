@@ -304,3 +304,154 @@ Workers run on the physical host and not on your VM.
             - Compute Engine and GKE get that access through the default Compute Engine service account.
             
     --- Profilter
+        . Clout profilter is a statistical, low-overhead profilter that continuously gathers CPU usage and memory-allocation 
+          information from our production applications 
+        - Continous profiling of prduction systems 
+        - Statistical, low-overhead, memory and CPU profiler 
+        - Insights contextualized to our code 
+
+        * Cloud Profilter features 
+            - Low-impact production 
+                . Provides a comprehensive application performance view without slowing it down 
+            - Pratical application profile creation 
+                . Continually analyses the performance of CPU or memory-intensive functions running in application 
+            - Broad language and product support 
+                . App Engine standard and flexible environments 
+                . Compute Engine 
+                . GKE
+                . Non-Google Cloud environment 
+            
+        * Available profiles 
+            ---> Image link: https://drive.google.com/file/d/1Fs3meAQhDOl0J5Z8SV60U7rtkFZSeeo_/view?usp=drive_link
+
+            - Profile Type 
+                . CPU time --> It is the time that the CPU spends executing a block of code.
+                . Heap -> It is the amount of memory allocated in the heap of the program when the profile is collected
+                . Allocated Heap -->  It is the total amount of memory that was allocated in the heap of the program
+                . Contention ---> It provides information about threads stuck waiting for other threads 
+                . Threads --> contain thread counts 
+                . Wall time --> the time that it takes to run a block of code
+
+        
+        *** QUIZ: Investigating Application Performance Issues
+            1. You deployed a new version of a service and all of a sudden significantly more instances are being created in your Kubernetes cluster. 
+               Your service scales when average CPU utilization is greater than 70%. What tool can help you investigate the problem?
+                ---> Logging 
+            
+            2. You have an SLO that states that 90% of your http requests need to respond in less than 100 ms. You want a report that compares latency for 
+                your last two versions. What tool would you use to most easily create this report?
+                    --> Trace 
+                
+            
+== Optimizing the Costs for Google Cloud Observability ==
+    --- Cost and Princing 
+        * Cloud Logging pricing 
+            Based on:                             Volume of chargeable logs in ingested 
+
+            Free allotment/moth                   . First 50GB per project, Logs retained for the default retention period 
+                                                  . Logs retained for the default retention period 
+
+            Examples of usage that incurs cost      . Cloud Load Balancing logs 
+                                                    . Custom logs 
+                                                    . Error reporting 
+                                                    . The write operation in the Cloud Logging API 
+                                                    . Log retention (beyond 30 days will incur a retention charge for non-required buckets.)
+
+
+        * Cloud Monitoring pricing 
+            Based on                                . Volume of chargeable metrics ingested 
+                                                    . Number of chargeable API calls 
+                                                    . Execution of Cloud Monitoring uptime checks 
+                                                    . Metrics ingested by using Google Cloud Managed Service for Prometheus 
+
+            Free allotment/moth                     . All non-chargeable Google Cloud metrics 
+                                                    . First 150 MiB per billing account 
+                                                    . First 1 million Read API calls per billing account 
+                                                    . 1 million uptime checks executions per project 
+
+            Examples of usage that incurs cost          . Cloud Monitoring custom metrics 
+                                                    . External metrics written to Cloud Monitoring through API or client libraries 
+                                                    . The read operation in the Monitoring API (except from the Google Cloud console)
+
+        * Clodu Trace Pricing 
+            Based on                                . Number of spans ingested and eventually scanned 
+
+            Free allotment/moth                     . First 2.5 million spans 
+                                 
+            Example of usage that incurs cost       . Spans 
+                                                    . Cloud Load Balancing 
+                                                    . Custom apps 
+
+        
+        * Data table
+        --> Currently free 
+            - Cloud Profiler 
+            - Cloud Audit, access transparency, and BigQuery Data Access logs 
+            - Uptime checks and logs analytics when queries runninng in Cloud Logging 
+            - Creating and using Dashboards 
+            - Google Cloud and Anthos metrics and log streams 
+        
+        * Network Telemetry pricing 
+            - VPC Flow logs, Firewall Rules Logging, and Cloud NAT logging cost standard log stroage fee 
+            - Logs stored in Cloud Logging are free to generate, but illed for storage per GB 
+            - Network Intelligence Center incurs costs for metrics overlaid on the network topology, Network Analyzer and performance Dashboard 
+            - Network Intelligence Center also incrus a cost for running connectivity tests and Firewall Insights 
+
+
+    --- Bill estimation 
+        . The Google Cloud Pricing Calculator is used to get an idea of the costs for hypothetical workloads 
+        . Start with current usages 
+        . We can also use the Cloud Estimation API to get billing information 
+
+
+    --- Cost Control Best Practices 
+        - Controlling logging costs 
+
+            Best Practices                     Description                                              Example 
+                Exclude logs                    Exclude certain logs based on high volume                   Common exlusions:
+                                                or the lackd of pratical value                                  . Load Balancers 
+                                                                                                                . VPC Flow Logs (still incurs costs)
+                                                                                                                . Web applications
+
+
+                Export logs                   Export logs yet exclude them from beging                        Export logs to:
+                                              ingested into Cloud Logging                                         . Cloud Storage, BigQuery, Pub/Sub 
+                
+
+                Reduce Ops Agent usage         Choose not to add agents in nonessential                         . Reduce log volume by not sending the additional logs generated 
+                                                environments                                                      by the Ops Agent to Cloud Logging 
+
+    --- Controlling monitoring costs 
+        Best Practices                              Description 
+            Optimize metrics and label usage            . Limit custom metric labels 
+                                                        . Select labels thoughfully 
+                                                
+            Reduce Ops Agent usage                      . Consider reducing the volume of metrics by not sending detailed metrics 
+                                                        . Reduce the number of VMs using Ops Agents 
+
+            Reduce custom metrics usage                 . Reduce the number of custom monitoring metrics that our apps send 
+
+        
+        * Controlling costs for Google Cloud Managed Service for Prometheus 
+            Best Practices                               Description        
+                Reduce the number of time series            . Increase the length of the sampling period 
+                                                            . Set the scraping interval on a per-job or per--target basis 
+                
+                Reduce the nomber of samples collection     . Do not send detailed system metrics from third-party apps 
+                                                            . Set the scraping interval on a per-job or per-target basis 
+                
+                Configure local aggreagation (              . Aggregate high-cardinality metrics locally by using recording rules, flags, 
+                    self-managed collection only               and environment variables 
+                )
+
+        * Controlling Trace costs 
+            Best Practices                                  Description 
+                Use OpenTelemetry                           Use the sampling feature to reduce the volume of trace ingestion 
+                                                            . Reduce sampling to one-fourth 
+                                                            . Use OpenTelemetry to specify sampling 
+
+                Use Cloud Trace API span quotas             Enforce span quotas to ensure that our project does not corss quota limit 
+
+                Optimize third party callers                Understand how instrumented apps interact to asses the effect of the number of spans ingested 
+
+
